@@ -1,0 +1,12 @@
+parameter_tuning:
+  iso_f: 0
+  lstm: 0
+  prophet: 0
+prediction:
+  iso_f: 0
+  lstm: 0
+  prophet: 0
+train:
+  iso_f: 0
+  lstm: 0
+  prophet: 0

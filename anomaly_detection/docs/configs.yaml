@@ -1,0 +1,72 @@
+dash_port: 7003
+data_main_path: data
+db_connection:
+  data_source: null
+  db: null
+  is_from_db: null
+  password: null
+  port: null
+  server: null
+  user: null
+docker: /
+docs_main_path: docs
+hyper_parameters:
+  iso_f:
+    contamination: 0.01
+    num_of_trees: 1000
+    split_ratio: 0.8
+  lstm:
+    activation: relu
+    batch_count: 8
+    batch_size: 16
+    epochs: 10
+    l1: 0.03
+    l2: 0.03
+    lag: 2
+    lahead: 2
+    lr: 0.04
+    split_ratio: 0.8
+    tsteps: 2
+    units: 8
+  prophet:
+    changepoint_range: 0.6
+    interval_width: 0.99
+    n_changepoints: 250
+    split_ratio: 0.8
+is_from_db: false
+log_main_path: logs
+merged_results: results_20200516.csv
+model_main_path: models
+output_file_name: results
+parameter_tuning:
+  iso_f:
+    contamination: 0.01*0.1
+    num_of_trees: 100*1000
+  lstm:
+    batch_size: 8*24
+    epochs: 5*15
+    l1: 0.01*0.04
+    l2: 0.01*0.04
+    lag: 2*4
+    lahead: 2*4
+    lr: 0.01*0.05
+    tsteps: 2*4
+    units: 4*12
+  prophet:
+    changepoint_range: 0.1*0.7
+    n_changepoints: 50*300
+path:
+  actual_values: actual_results.csv
+  external: result_selim.csv
+  external_2: result_volkan.csv
+  franchise_info: BayiIlkVeriGoderimTarihi.csv
+  merged_results: results_20200501.csv
+  model_data: data_for_lstm.csv
+  raw: ml3yil_20200429.csv
+  results: results.csv
+port_ranges: 6000*7000
+prediction_date: 2020-03-01
+server: /tmp/mnt
+train_end_date: 2020-01-01
+web_port: 7002
+has_param_tuning_first_run: false

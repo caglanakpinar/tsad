@@ -1,0 +1,17 @@
+multiprocess
+datetime
+random2
+numpy
+pandas
+flask
+schedule
+celery
+redis
+pyYAML
+plotly
+dash-html-components
+dash-core-components
+dash
+mysql-connector-python
+psycopg2-binary
+google-cloud-bigquery

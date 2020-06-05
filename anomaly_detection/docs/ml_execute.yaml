@@ -1,0 +1,115 @@
+parameter_tuning:
+  active: false
+  api: ml
+  browser_time: 2020-05-30 14
+  day: null
+  description: null
+  execute:
+  - params:
+      data_query_path: null
+      data_source: null
+      date: null
+      feature: null
+      groups: null
+      job: parameter_tuning
+      model: lstm
+      time_indicator: null
+      time_period: null
+  - params:
+      data_query_path: null
+      data_source: null
+      date: null
+      feature: null
+      groups: null
+      job: parameter_tuning
+      model: iso_f
+      time_indicator: null
+      time_period: null
+  - params:
+      data_query_path: null
+      data_source: null
+      date: null
+      feature: null
+      groups: null
+      job: parameter_tuning
+      model: prophet
+      time_indicator: null
+      time_period: null
+  job_end_date: null
+  job_start_date: null
+  multiprocess: true
+  receive: false
+  stop_job:
+    job: stop
+    model: train
+  time_zone_diffs: 0
+prediction:
+  active: true
+  api: ml
+  browser_time: 2020-05-30 14
+  day: null
+  description: null
+  execute:
+  - params:
+      data_query_path: null
+      data_source: null
+      date: null
+      feature: null
+      groups: null
+      job: prediction
+      model: lstm
+      time_indicator: null
+      time_period: null
+  job_end_date: null
+  job_start_date: null
+  multiprocess: true
+  receive: false
+  stop_job:
+    job: stop
+    model: train
+  time_zone_diffs: 0
+train:
+  active: false
+  api: ml
+  browser_time: 2020-05-30 14
+  day: null
+  description: null
+  execute:
+  - params:
+      data_query_path: null
+      data_source: null
+      date: null
+      feature: null
+      groups: null
+      job: train
+      model: lstm
+      time_indicator: null
+      time_period: null
+  - params:
+      data_query_path: null
+      data_source: null
+      date: null
+      feature: null
+      groups: null
+      job: train
+      model: iso_f
+      time_indicator: null
+      time_period: null
+  - params:
+      data_query_path: null
+      data_source: null
+      date: null
+      feature: null
+      groups: null
+      job: train
+      model: prophet
+      time_indicator: null
+      time_period: null
+  job_end_date: null
+  job_start_date: null
+  multiprocess: true
+  receive: false
+  stop_job:
+    job: stop
+    model: train
+  time_zone_diffs: 0

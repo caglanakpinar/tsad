@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  </head>
+  <body>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-165714313-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-165714313-1');
+    </script>
+    </script>
+    <script>
+      function sendTimeToServer(){
+          var time = new Date();
+          var i = document.createElement("img");
+          i.src = "/timer?messages=True&time=" + time;
+          document.getElementById("time").innerHTML = time;
+      }
+     </script>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="home">Anomaly Detection</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link " href="home">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="configs">Config</span></a>
+          </li>
+          <li class="nav-item dropdown active">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              ML  Executor
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="ml_execute">Jobs Center</a>
+              <a class="dropdown-item active" href="query?messages=True">Create Task<span class="sr-only">(current)</a>
+              <a class="dropdown-item" href="dashboard">Dashboard</a>
+            </div>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Models
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="query">LSTM</a>
+              <a class="dropdown-item" href="query">Isolation Forest</a>
+              <a class="dropdown-item" href="#">Prophet</a>
+              <a class="dropdown-item" href="anomaly_dashboard">Dashboard</a>
+            </div>
+          </li>
+        </ul>
+        <form class="form-inline my-2 my-lg-0" method="POST">
+          <input name='search' class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form>
+      </div>
+    </nav>
+    <style>
+
+    .alert {
+    font-size: 30px;
+    position: center;
+    margin: auto;
+    }
+    input[name=date_indicator1]{
+      position: center;
+      box-sizing: border-box;
+      height: auto;
+      padding: 20px;
+      font-size: 30px;
+      margin-bottom: 20px;
+      border-radiu: 0;
+    }
+     input[type=date]{
+      position: center;
+      box-sizing: border-box;
+      height: auto;
+      padding: 2px;
+      font-size: 20px;
+      margin-bottom: 2px;
+      border-radiu: 0;
+    }
+    input[type=time]{
+      position: center;
+      box-sizing: border-box;
+      height: auto;
+      padding: 2px;
+      font-size: 20px;
+      margin-bottom: 2px;
+      border-radiu: 0;
+    }
+
+    form[name=asdsad] {
+      padding: 2px;
+    }
+
+    </style>
+    <div class="row">
+      <div class="col-md-6 text-left">
+        <div class="container mt-10">
+
+        </div>
+      </div>
+    </div>
+
+  <form name="asdsad" method="POST">
+    <div class="container md-30 mt-30">
+      <div class="row">
+        <h3 class="display-1">Create Task</h3>
+        <h3><small class="text-muted"> Create Task by using informations. Make sure use each model and train predicton task individually</small></h3>
+        <div class="col-md-30-mt-30 text-right">
+        <div  class="form-group row">
+          <label for="inputEmail3" class="col-sm-2 col-form-label">Job Name</label>
+          <div class="col-sm-10">
+            <input name= "job_name" type="text" class="form-control" id="inputEmail3" placeholder="train daily job">
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="description" class="col-sm-2 col-form-label">Description</label>
+          <div class="col-sm-10">
+            <input name="description" type="text" class="form-control" id="description" placeholder="this job is train for model LSTM">
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="dimensions" class="col-sm-2 col-form-label">Model Dimensions (Model Dimensions of each group must have unique date indicator. For otomatically pick, you may not select any)</label>
+          <div class="col-sm-10">
+              <select name="dimensions" class="custom-select" id="dimensions" size="10" aria-multiselectable="true" multiple>
+                {% for col in cols %}
+                  <option value= "{{col}}">{{col}}</option>"
+                {% endfor %}
+              </select>
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="date" class="col-sm-2 col-form-label">Date Indicator</label>
+          <div class="col-sm-10">
+            {%  if exception != '' %}
+              <select name="time_indicator" class="custom-select" id="date" size="8" style="border-color: #FF0000;">
+                {% for col in cols %}
+                  <option value= "{{col}}">{{col}}</option>"
+                {% endfor %}
+              </select>
+            {%  endif %}
+            {%  if exception == '' %}
+              <select name="time_indicator" class="custom-select" id="date" size="8">
+                {% for col in cols %}
+                  <option value= "{{col}}">{{col}}</option>"
+                {% endfor %}
+              </select>
+            {%  endif %}
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="feature" class="col-sm-2 col-form-label">Anomaly Feature</label>
+          <div class="col-sm-10">
+            {%  if exception != '' %}
+              <select name="feature" class="custom-select" id="feature" size="8" style="border-color: #FF0000;">
+                {% for col in cols %}
+                  <option value= "{{col}}">{{col}}</option>"
+                {% endfor %}
+              </select>
+            {%  endif %}
+            {%  if exception == '' %}
+              <select name="feature" class="custom-select" id="feature" size="8" >
+                {% for col in cols %}
+                  <option value= "{{col}}">{{col}}</option>"
+                {% endfor %}
+              </select>
+            {%  endif %}
+
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="feature" class="col-sm-2 col-form-label">Train</label>
+          <div class="col-sm-10">
+            <select name="day_train" class="browser-default custom-select">
+              <option selected>Daily</option>
+              <option value="only once">only once</option>
+              <option value="Mondays">Mondays</option>
+              <option value="Tuesdays">Tuesdays</option>
+              <option value="Wednesdays">Wednesdays</option>
+              <option value="Thursdays">Thursdays</option>
+              <option value="Fridays">Fridays</option>
+              <option value="Saturdays">Saturdays</option>
+              <option value="Sundays">Sundays</option>
+              <option value="Weekly">Weekly</option>
+              <option value="Every 2 Weeks">Every 2 Weeks</option>
+              <option value="Monthly">Monthly</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="feature" class="col-sm-2 col-form-label">Prediction</label>
+          <div class="col-sm-10">
+            <select name="day_prediction" class="browser-default custom-select">
+              <option selected>Daily</option>
+              <option value="min">real time</option>
+              <option value="Mondays">Mondays</option>
+              <option value="Tuesdays">Tuesdays</option>
+              <option value="Wednesdays">Wednesdays</option>
+              <option value="Thursdays">Thursdays</option>
+              <option value="Fridays">Fridays</option>
+              <option value="Saturdays">Saturdays</option>
+              <option value="Sundays">Sundays</option>
+              <option value="Weekly">Weekly</option>
+              <option value="Every 2 Weeks">Every 2 Weeks</option>
+              <option value="Every Min">Every Minute</option>
+              <option value="Every Second">Every Second</option>
+              <option value="Monthly">Monthly</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="feature" class="col-sm-2 col-form-label">Parameter Tuning</label>
+          <div class="col-sm-10">
+            <select name="day_parameter_tuning" class="browser-default custom-select" title="This will be runing with selected time period. help to improve the ML models of accuracy.">
+              <option selected>Daily</option>
+              <option value="only once">only once</option>
+              <option value="Mondays">Mondays</option>
+              <option value="Tuesdays">Tuesdays</option>
+              <option value="Wednesdays">Wednesdays</option>
+              <option value="Thursdays">Thursdays</option>
+              <option value="Fridays">Fridays</option>
+              <option value="Saturdays">Saturdays</option>
+              <option value="Sundays">Sundays</option>
+              <option value="Weekly">Weekly</option>
+              <option value="Every 2 Weeks">Every 2 Weeks</option>
+              <option value="Monthly">Monthly</option>
+            </select>
+          </div>
+        </div>
+
+
+        <div class="form-group row">
+          <label for="date1_train" class="col-sm-2 col-form-label">Train Job Dates</label>
+          <div class="col-sm-10">
+            <time datetime="YYYY-MM-DDThh:mm:ssTZD">
+            <label name="start" class="col-sm-1 col-form-label"> Start Date </label>
+            <input name="date1_train" type='date' id="date1_train" >
+            <input name="time1_train" type='time' >
+            <label name="end" class="col-sm-1 col-form-label"> End Time </label>
+            <input name="date2_train" type='date' >
+            <input name="time2_train" type='time' >
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="date1_prediction" class="col-sm-2 col-form-label">Prediction Job Dates</label>
+          <div class="col-sm-10">
+            <time datetime="YYYY-MM-DDThh:mm:ssTZD">
+            <label name="start" class="col-sm-1 col-form-label"> Start Date </label>
+            {%  if exception != '' %}
+              <input name="date1_prediction" type='date' id="date1_prediction" style="border-color: #FF0000;">
+              <input name="time1_prediction" type='time' style="border-color: #FF0000;">
+            {% endif %}
+            {%  if exception == '' %}
+              <input name="date1_prediction" type='date' id="date1_prediction" >
+              <input name="time1_prediction" type='time' >
+            {% endif %}
+            <label name="end" class="col-sm-1 col-form-label"> End Time </label>
+            <input name="date2_prediction" type='date' >
+            <input name="time2_prediction" type='time' >
+          </div>
+        </div>
+
+        <button name="submit" type="submit" class="btn btn-primary" onclick="sendTimeToServer()" style="width: 30%; min-height:40px;">Create Job</button>
+        <button name="dash" type="submit" class="btn btn-primary"  style="width: 30%; min-height:40px;">Show Dashboard</button>
+        <nav aria-label="...">
+          <ul class="pagination">
+            <li class="page-item disabled">
+              <a class="page-link" href="#" tabindex="-1">Previous</a>
+            </li>
+
+            <li class="page-item active">
+              <a class="page-link" href="/query?messages=True">Task Create<span class="sr-only">(current)</span></a>
+            </li>
+            <li class="page-item"><a class="page-link" href="ml_execute">Job Run</a></li>
+
+            <li class="page-item">
+              <a class="page-link" href="ml_execute">Next</a>
+            </li>
+          </ul>
+        </nav>
+        </div>
+      </div>
+    </div>
+    </div>
+  </form>
+  </body>
+</html>
+
+
+

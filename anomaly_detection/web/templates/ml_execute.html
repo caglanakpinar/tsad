@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  </head>
+  <body>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-165714313-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-165714313-1');
+    </script>
+    <script>
+      function sendTimeToServerStart(){
+          var time = new Date();
+          var i = document.createElement("img");
+          i.src = "/timer?time=" + time;
+          document.getElementById("time").innerHTML = time;
+      }
+
+      function sendTimeToServerEnd(){
+          var time = new Date();
+          var i = document.createElement("img");
+          i.src = "/timer?time=" + time;
+          document.getElementById("time").innerHTML = time;
+      }
+     </script>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="home">Anomaly Detection</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link " href="home">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="configs">Config</a>
+          </li>
+          <li class="nav-item dropdown active">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              ML Executor
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item active" href="ml_execute">Jobs Center<span class="sr-only">(current)</span></a>
+              <a class="dropdown-item" href="query?messages=True">Create Task</a>
+              <a class="dropdown-item" href="dashboard">Dashboard</a>
+            </div>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Models
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="query">LSTM</a>
+              <a class="dropdown-item" href="query">Isolation Forest</a>
+              <a class="dropdown-item" href="#">Prophet</a>
+              <a class="dropdown-item" href="anomaly_dashbord">Dashboard</a>
+            </div>
+          </li>
+        </ul>
+        <form class="form-inline my-2 my-lg-0" method="POST">
+          <input name='search' class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form>
+      </div>
+    </nav>
+    <style>
+
+    .alert {
+    font-size: 30px;
+    position: center;
+    margin: auto;
+    }
+    input[name=date_indicator1]{
+      position: center;
+      box-sizing: border-box;
+      height: auto;
+      padding: 20px;
+      font-size: 30px;
+      margin-bottom: 20px;
+      border-radiu: 0;
+    }
+     input[type=date]{
+      position: center;
+      box-sizing: border-box;
+      height: auto;
+      padding: 2px;
+      font-size: 20px;
+      margin-bottom: 2px;
+      border-radiu: 0;
+    }
+    input[type=time]{
+      position: center;
+      box-sizing: border-box;
+      height: auto;
+      padding: 2px;
+      font-size: 20px;
+      margin-bottom: 2px;
+      border-radiu: 0;
+    }
+
+    form[name=asdsad] {
+      padding: 2px;
+    }
+
+    </style>
+    <div class="row">
+      <div class="col-md-6 text-left">
+        <div class="container mt-10">
+
+        </div>
+      </div>
+    </div>
+
+  <form name="asdsad" method="POST">
+    <div class="container md-30 mt-30">
+      <div class="row">
+        <h3 class="display-1">Job Run</h3>
+        <div class="col-md-30-mt-30 text-left"><h3><small class="text-muted">Monitor the created job or initialize the job. This process will not start before activate the job.</small></h3></div>
+        <div class="col-md-30-mt-30 text-right">
+
+        <div  class="form-group row">
+          {% if train_process == 'start' %}
+            <button name = 'train' for="train_bar"name="submit" type="submit" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal"  value="stop" onclick="sendTimeToServerEnd()" style="height: 75px; width: 150px;">Stop Train</button>
+            <div id="time"></div>
+          {% endif %}
+          {% if train_process == 'stop' %}
+            <button name = 'train' for="train_bar"name="submit" type="submit" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" value="start" onclick="sendTimeToServerStart()" style="height: 75px; width: 150px;">Start Train</button>
+            <div id="time" style="visibility: hidden;"></div>
+          {% endif %}
+          <div class="col-sm-10 text-right">
+            {% if train_status == 'in_progress' %}
+              <div class="progress text-right" style="height: 75px; width: 1000px;">
+                <div name="train_bar" id="train_bar" class="progress-bar" role="progressbar"
+                     style="font-size:30px; width: {{ train_precent }}%;" aria-valuenow={{ train_precent }} aria-valuemin="0" aria-valuemax="100">{{ train_precent }}%</div>
+              </div>
+            {% endif %}
+            {% if train_status == 'init' %}
+              <div class="progress text-right" style="height: 75px; width: 1000px;">
+                  <div name="train_bar" id="train_bar2" class="progress-bar bg-info" role="progressbar"
+                       style="font-size:30px; width: 100%;" aria-valuenow={{ train_precent }}  aria-valuemin="0" aria-valuemax="100"> ACTIVATE JOB!! Then It will start at {{ train_date }}</div>
+              </div>
+            {% endif %}
+            {% if train_status == 'waiting' %}
+              <div class="progress text-right" style="height: 75px; width: 1000px;">
+                  <div  name="train_bar" id="train_bar3" class="progress-bar bg-success" role="progressbar"
+                        style="width: 100%; font-size:30px;" aria-valuenow={{ train_precent }} aria-valuemin="0" aria-valuemax="100"> WAITING!!! Job will start at {{ train_date }}</div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+
+        <div  class="form-group row">
+          {% if prediction_process == 'start' %}
+            <button name = 'prediction' for="prediction_bar"name="submit" type="submit" class="btn btn-primary" value="stop" onclick="sendTimeToServerEnd()" style="height: 75px; width: 150px;">Stop Prediction</button>
+            <div id="time" style="visibility: hidden;"></div>
+          {% endif %}
+          {% if prediction_process == 'stop' %}
+            <button name = 'prediction' for="prediction_bar"name="submit" type="submit" class="btn btn-primary" value="start" onclick="sendTimeToServerStart()" style="height: 75px; width: 150px;">Start Prediction</button>
+            <div id="time" style="visibility: hidden;"></div>
+          {% endif %}
+          <div class="col-sm-10 text-right">
+            {% if prediction_status == 'in_progress' %}
+              <div class="progress text-right" style="height: 75px; width: 1000px;">
+                <div name="prediction_bar" id="prediction_bar" class="progress-bar" role="progressbar"
+                     style="font-size:30px; width: {{ prediction_precent }}%;" aria-valuenow={{ prediction_precent }} aria-valuemin="0" aria-valuemax="100">{{ prediction_precent }}%</div>
+              </div>
+            {% endif %}
+            {% if prediction_status == 'init' %}
+              <div class="progress text-right" style="height: 75px; width: 1000px;">
+                  <div name="prediction_bar" id="prediction_bar2" class="progress-bar bg-info" role="progressbar"
+                       style="font-size:30px; width: 100%;" aria-valuenow={{ prediction_precent }}  aria-valuemin="0" aria-valuemax="100"> ACTIVATE JOB!! Then It will start at {{ prediction_date }}</div>
+              </div>
+            {% endif %}
+            {% if prediction_status == 'waiting' %}
+              <div class="progress text-right" style="height: 75px; width: 1000px;">
+                  <div  name="prediction_bar" id="prediction_bar3" class="progress-bar bg-success" role="progressbar"
+                        style="width: 100%; font-size:30px;" aria-valuenow={{ prediction_precent }} aria-valuemin="0" aria-valuemax="100"> WAITING!!! Job will start at {{ prediction_date }}</div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div  class="form-group row">
+          {% if tuning_process == 'start' %}
+            <button name = 'parameter_tuning' for="parameter_tuning_bar"name="submit" type="submit" class="btn btn-primary" value="stop" onclick="sendTimeToServerEnd()" style="height: 75px; width: 150px;";">Stop Tunning</button>
+            <div id="time" style="visibility: hidden;"></div>
+          {% endif %}
+          {% if tuning_process == 'stop' %}
+            <button name = 'parameter_tuning' for="parameter_tuning_bar"name="submit" type="submit" class="btn btn-primary" value="start" onclick="sendTimeToServerStart()" style="height: 75px; width: 150px;"">Start Tuning</button>
+            <div id="time" style="visibility: hidden;"></div>
+          {% endif %}
+          <div class="col-sm-10 text-right">
+            {% if tuning_status == 'in_progress' %}
+              <div class="progress text-right" style="height: 75px; width: 1000px;">
+                <div name="parameter_tuning_bar" id="parameter_tuning_bar" class="progress-bar" role="progressbar"
+                     style="width: {{ tuning_percent }}%; font-size:30px;" aria-valuenow={{ tuning_percent }} aria-valuemin="0" aria-valuemax="100">{{ tuning_percent }}%</div>
+              </div>
+            {% endif %}
+            {% if tuning_status == 'init' %}
+              <div class="progress text-right" style="height: 75px; width: 1000px;">
+                  <div name="parameter_tuning_bar" id="parameter_tuning_bar2" class="progress-bar bg-info" role="progressbar"
+                       style="width: 100%; font-size:30px;" aria-valuenow={{ tuning_percent }}  aria-valuemin="0" aria-valuemax="100"> ACTIVATE JOB!! Then It will start at {{ tuning_date }}</div>
+              </div>
+            {% endif %}
+            {% if tuning_status == 'waiting' %}
+              <div class="progress text-right" style="height: 75px; width: 1000px;">
+                  <div  name="parameter_tuning_bar" id="parameter_tuning_bar3" class="progress-bar bg-success" role="progressbar"
+                        style="width: 100%; font-size:30px;" aria-valuenow={{ tuning_precent }} aria-valuemin="0" aria-valuemax="100"> WAITING!!! Job will start at {{ tuning_date }}</div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+
+
+
+
+
+
+
+
+         <div  class="form-group row">
+          <div class="col-sm-10 text-right">
+            <button name="submit" type="submit" class="btn btn-primary" style="position: absolute; right: 60; height: 75px; width: 150px; font-size:30px"> Start All</button>
+          </div>
+        </div>
+         <div  class="form-group row" style="div.style.top: 200px;">
+          <div class="col-sm-10 text-right">
+            <nav aria-label="...">
+            <ul class="pagination" style="text-align: center;">
+              <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1">Previous</a>
+              </li>
+
+              <li class="page-item"><a class="page-link" href="/query?messages=True">Task Create</a></li>
+              <li class="page-item active">
+                <a class="page-link" href="#">Job Run<span class="sr-only">(current)</span></a>
+              </li>
+
+              <li class="page-item">
+                <a class="page-link" href="#">Next</a>
+              </li>
+            </ul>
+          </nav>
+
+          </div>
+        </div>
+          {%  if exception != '' %}
+            <div class="alert alert-primary" role="alert">
+              {{ exception }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </form>
+  </body>
+</html>
+
+
+

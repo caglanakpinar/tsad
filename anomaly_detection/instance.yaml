@@ -1,0 +1,29 @@
+instances:
+- active: true
+  directory: /Users/mac/Desktop/anomaly_detection_framework
+  id: 027881459115391294
+  start_date: 2020-05-30 16:23:22.722323
+- active: true
+  directory: /Users/mac/Desktop/tsad_test/anomaly_detection_framework
+  id: 07093958983528285
+  start_date: 2020-06-01 17:06:21.247606
+- active: false
+  directory: /Users/mac/Desktop/test_ad/anomaly_detection_framework
+  id: 06296407830324247
+  start_date: 2020-06-01 19:44:21.123046
+- active: true
+  directory: /Users/mac/Desktop/test_ad/test_docker/anomaly_detection_framework
+  id: 07295441965676959
+  start_date: 2020-06-01 20:54:55.599816
+- active: true
+  directory: /Users/mac/Desktop/test_ad/test_2/anomaly_detection_framework
+  id: 0026492512861331585
+  start_date: 2020-06-02 22:55:52.209417
+- active: true
+  directory: /Users/mac/Desktop/test_ad/test_3/anomaly_detection_framework
+  id: 08545802978721112
+  start_date: 2020-06-02 23:01:12.028303
+- active: true
+  directory: /Users/mac/Desktop/test_ad/test_4/anomaly_detection_framework
+  id: 05389205534993675
+  start_date: 2020-06-02 23:44:33.711917

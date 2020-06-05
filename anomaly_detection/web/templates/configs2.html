@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  </head>
+  <body>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-165714313-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-165714313-1');
+</script>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="home">Anomaly Detection</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link " href="home">Home</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="configs">Config<span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              ML  Executor
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="ml_execute">Jobs Center</a>
+              <a class="dropdown-item" href="query?messages=True">Create Task</a>
+              <a class="dropdown-item" href="dashboard">Dashboard</a>
+            </div>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Models
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="query">LSTM</a>
+              <a class="dropdown-item" href="query">Isolation Forest</a>
+              <a class="dropdown-item" href="#">Prophet</a>
+              <a class="dropdown-item" href="anomaly_dashboard">Dashboard</a>
+            </div>
+          </li>
+        </ul>
+        <form class="form-inline my-2 my-lg-0" method="POST">
+          <input name='search' class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form>
+      </div>
+    </nav>
+
+    <form method="POST">
+        <div class="container-fluid">
+        <div class="container-fluid">
+            <h4>Data Source Type</h4>
+        </div>
+    </div>
+            <div class="container-fluid">
+                <div class="container-fluid">
+                        <select class="custom-select custom-select-lg mb-3" name="data_source">
+                            <option value="mysql">MySQL Server</option>
+                            <option value="postgresql">PostgreSQL</option>
+                            <option value="awsredshift">AWS RedShift</option>
+                            <option value="googlebigquery">Google BigQuery</option>
+                            <option value="csv">csv</option>
+                            <option value="json">json</option>
+                            <option value="pickle">pickle</option>
+                        </select>
+                </div>
+    </div>
+        <div class="container-fluid">
+        <div class="container-fluid">
+            <h4>Data Source Configurations</h4>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="container-fluid">
+            <div class="form-group">
+              <label for="exampleFormControlTextarea1">enter data path / query</label>
+              <textarea name="data_query_path" class="form-control" id="exampleFormControlTextarea1" rows="3" placeholder="raw_data.csv / SELECT * FROM table"></textarea>
+              <small id="emailHelp" class="form-text text-muted">pls enter file name .csv .json or paste your query.</small>
+            </div>
+              <div class="form-group">
+                  <label for="exampleInputEmail1">enter Db name</label>
+                  <input name="db_name" type="text" class="form-control" id="db_i" aria-describedby="emailHelp" placeholder="testdb">
+                  <small id="db_s" class="form-text text-muted">enter your db name where query.</small>
+            </div>
+            <div class="form-group">
+                  <label for="host ">host</label>
+                  <input name="host" type="text" class="form-control" id="host_i" aria-describedby="emailHelp" placeholder="127.0.0.1">
+                  <small id="host_s" class="form-text text-muted">pls host your host name or IP.</small>
+            </div>
+            <div class="form-group">
+                  <label for="port">port</label>
+                  <input name="port" type="text" class="form-control" id="port_i" aria-describedby="emailHelp" placeholder="1433">
+                  <small id="port_s" class="form-text text-muted">pls enter your port.</small>
+            </div>
+            <div class="form-group">
+                  <label for="user">user</label>
+                  <input name="user" type="text" class="form-control" id="user_i" aria-describedby="emailHelp" placeholder="admin">
+                  <small id="user_s" class="form-text text-muted">pls enter your user name.</small>
+            </div>
+            <div class="form-group">
+              <label for="exampleInputPassword1">Password</label>
+              <input name="pw" type="password" class="form-control" id="exampleInputPassword1" placeholder="****">
+            </div>
+            <input type="submit">
+            {% if exception != '' %}
+                <div class="alert alert-danger" role="alert">{{ exception }}</div>
+
+            {% endif %}
+
+        </div>
+    </div>
+  </form>
+  </body>
+</html>

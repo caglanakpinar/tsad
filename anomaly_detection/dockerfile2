@@ -1,0 +1,9 @@
+FROM continuumio/miniconda3
+
+COPY ./ /
+
+RUN pip install -r /requirements_pip.txt
+RUN conda install requests
+
+CMD ["python", "/ml_executor.py"]
+

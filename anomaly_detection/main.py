@@ -17,13 +17,13 @@ def get_model(model):
         return TrainProphet
 
 
-def model_execute(model, groups, feature, time_indicator, data_source, data_query_path, time_periods):
+def model_execute(model, groups, feature, time_indicator, data_source, data_query_path, time_period):
     train = get_model(model)(job='prediction',
                              groups=groups,
                              time_indicator=time_indicator,
                              feature=feature,
                              data_source=data_source,
-                             data_query_path=data_query_path, time_periods=time_periods)
+                             data_query_path=data_query_path, time_period=time_period)
     train.prediction_execute()
     return train.anomaly
 
@@ -36,14 +36,14 @@ def main(job=None,
          feature=None,
          data_source=None,
          data_query_path=None,
-         time_periods=None):
+         time_period=None):
     sys.stdout = Logger(job) if job != 'stop' else print()
     data_query_path = url_string(data_query_path)
     print("received :",
                         {'job': job, 'model': model, 'groups': groups,
                          'date': date, 'time_indicator': time_indicator,
                          'feature': feature, 'data_source': data_source,
-                         'data_query_path': data_query_path},
+                         'data_query_path': data_query_path, 'time_period': time_period},
           " time :", get_time()
           )
     if job == 'train':
@@ -54,8 +54,9 @@ def main(job=None,
                                  data_source=data_source,
                                  data_query_path=data_query_path)
         train.train_execute()
+        train.logger.check_total_process_and_regenerate()
     if job == 'prediction':
-        outputs = {m: model_execute(m, groups, feature, time_indicator, data_source, data_query_path, time_periods) for m in ['lstm', 'iso_f', 'prophet']}
+        outputs = {m: model_execute(m, groups, feature, time_indicator, data_source, data_query_path, time_period) for m in ['lstm', 'iso_f', 'prophet']}
         result = merged_models(model_1=outputs['lstm'],
                                model_2=outputs['iso_f'],
                                model_3=outputs['prophet'],
@@ -63,7 +64,11 @@ def main(job=None,
                                data_source=data_source,
                                data_query_path=data_query_path,
                                time_indicator=time_indicator,
-                               groups=groups)
+                               groups=groups,
+                               time_period=time_period,
+                               feature=feature)
+        logger = LoggerProcess(job=job)
+        logger.check_total_process_and_regenerate()
     if job == 'parameter_tuning':
         p_tunning = get_model(model)(job=job,
                                      groups=groups,
@@ -72,8 +77,12 @@ def main(job=None,
                                      data_source=data_source,
                                      data_query_path=data_query_path)
         p_tunning.parameter_tuning()
+        logger = LoggerProcess(job=job)
+        logger.check_total_process_and_regenerate()
     if job == 'stop':
         kill_process_with_name(process_name="main.py", argument=model)
+        logger = LoggerProcess(job=job)
+        logger.regenerate_file()
     get_time()
     print("Done!!")
 

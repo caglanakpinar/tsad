@@ -12,11 +12,14 @@ from os.path import join
 import signal
 import math
 import random
-
-from configs import weekdays, conf, boostrap_ratio
 import socket
+import errno
 import urllib
 import time
+from os import listdir
+from os.path import dirname, join
+
+from configs import weekdays, conf, boostrap_ratio
 
 
 def callfunc(my_file):
@@ -58,8 +61,14 @@ def kill_process_with_name(process_name, argument=None):
 
 
 def is_port_in_use(port):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex(('localhost', port)) == 0
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    use = False
+    try:
+        s.bind(("0.0.0.0", port))
+    except socket.error as e:
+        if e.errno == errno.EADDRINUSE:
+            use = True
+    return use
 
 
 def read_yaml(directory, filename):
@@ -123,8 +132,6 @@ def date_part(date, part):
         return 1 if date.isoweekday() in [6, 7] else 0
     if part == 'week_day':
         return date.isoweekday()
-    if part == 'day':
-        return datetime.datetime.strftime(date, "%Y-%m-%d")
     if part == 'hour':
         return date.hour
     if part == 'min':
@@ -169,7 +176,6 @@ def get_split_date(period=None, dates=None, params=None):
             last_isoweekday = lambda x: today + datetime.timedelta(days=-today.weekday()) + datetime.timedelta(days=x)
             split_date = last_isoweekday(isoweekday[period])
         if period in list(day_diffs.keys()):
-            print()
             split_date = today - datetime.timedelta(days=day_diffs[period])
         if period in list(hour_diffs.keys()):
             split_date = today - hour_diffs[period]
@@ -247,6 +253,46 @@ def get_residuals(residuals, ratio):
         return random.sample(residuals, len(residuals) * ratio)
 
 
+convert_date_to_day = lambda x:  datetime.datetime.strptime(str(x)[0:10], "%Y-%m-%d %H:%M:%S")
+
+
+def show_chart(df, x, y1, y2, is_bar_chart):
+    """
+    plots line chart with to lines
+    params: df; x, y1, y2 fields included, x: x axis of data set, y1, y2 and y3; y axis of data sets
+    params: is_bar_chart if True shows Bar chart, is_sorted: if True sorts y1, y2 and y3
+    return: return multi dimensional line chart or bar chart on plotly
+    """
+    import plotly.graph_objs as go
+    import plotly.offline as offline
+    offline.init_notebook_mode()
+
+    chart = go.Bar if is_bar_chart else go.Scatter
+    marker = {'size': 15, 'opacity': 0.5, 'line': {'width': 0.5, 'color': 'white'}}
+    x = df[x]
+    _y1, _y2 = df[y1], df[y2]
+    trace = []
+    names = [y1, y2]
+    counter = 0
+    for _y in [_y1, _y2]:
+        if not is_bar_chart:
+            trace.append(chart(x=x, y=_y, mode='lines+markers', name=names[counter], marker=marker))
+        else:
+            trace.append(chart(x=x, y=_y, name=names[counter]))
+        counter += 1
+    offline.iplot(trace)
+
+
+def get_results(date_col):
+    results = []
+    for f in listdir(dirname(join(conf('data_main_path'), ""))):
+        f_splits = f.split(conf('result_file'))
+        if f_splits[0] == "":
+            results += pd.read_csv(join(conf('data_main_path'), "", f)).to_dict('results')
+    results = pd.DataFrame(results)
+    if len(results) >= 1000:
+        results = results.sort_values(by=date_col, ascending=True)[-1000:]
+    return results
 
 
 

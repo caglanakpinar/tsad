@@ -49,7 +49,8 @@ class CreateApi:
             if func is None:
                 raise RuntimeError('Not running with the Werkzeug Server')
             func()
-
+        print("port :", self.port)
+        print("host :", self.host)
         return app.run(threaded=False, debug=False, port=self.port, host=self.host)
 
 
@@ -78,9 +79,7 @@ class CreateApi:
 def api_executor(api_info):
     _file_path = join(dirname(__file__), api_info['py_file'])
     _py = callfunc(_file_path)
-    print(_py)
     _func = [o[1] for o in getmembers(_py) if o[0] == api_info['function']][0]
-    print(_file_path, _py,  _func)
     api = CreateApi(host=api_info['host'],
                     port=api_info['port'],
                     function=_func,

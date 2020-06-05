@@ -1,0 +1,7 @@
+PyYAML
+numpy
+pandas
+flask
+requests
+scikit-learn
+scipy

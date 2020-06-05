@@ -1,0 +1,57 @@
+version: '3'
+
+services:
+  ml_executor-services:
+    build:
+      context: .
+      dockerfile: dockerfile2
+    image: anomaly_detection_framework_ml_executor-services:latest
+    ports:
+      - "7000:7000"
+    volumes:
+      - ./data:/data
+      - ./models:/models
+      - ./logs:/logs
+      - ./docs:/docs
+  model-services-iso_f:
+    build:
+      context: .
+      dockerfile: dockerfile
+    image: anomaly_detection_framework_model-services:latest
+    ports:
+      - "6000:6000"
+    entrypoint: ["python", "/model_api.py", "model_iso_f"]
+    volumes:
+      - ./data:/data
+      - ./models:/models
+      - ./logs:/logs
+      - ./docs:/docs
+  model-services-lstm:
+    build:
+      context: .
+      dockerfile: dockerfile
+    image: anomaly_detection_framework_model-services:latest
+    ports:
+      - "6001:6001"
+    volumes:
+      - ./data:/data
+      - ./models:/models
+      - ./logs:/logs
+      - ./docs:/docs
+    entrypoint: ["python", "/model_api.py", "model_lstm"]
+  model-services-prophet:
+    build:
+      context: .
+      dockerfile: dockerfile
+    image: anomaly_detection_framework_model-services:latest
+    ports:
+      - "6002:6002"
+    entrypoint: ["python", "/model_api.py", "model_prophet"]
+    volumes:
+      - ./data:/data
+      - ./models:/models
+      - ./logs:/logs
+      - ./docs:/docs
+
+
+

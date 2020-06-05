@@ -1,0 +1,13 @@
+multiprocess
+datetime
+random2
+numpy
+pandas
+flask
+schedule
+celery
+redis
+pyYAML
+mysql-connector-python
+psycopg2-binary
+google-cloud-bigquery
