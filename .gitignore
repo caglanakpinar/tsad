@@ -123,3 +123,5 @@ dmypy.json
 .pyre/
 *.xml
 .DS_Store
+.idea
+.ipynb_checkpoints
