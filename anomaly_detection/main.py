@@ -37,7 +37,12 @@ def main(job=None,
          data_source=None,
          data_query_path=None,
          time_period=None):
-    sys.stdout = Logger(job) if job != 'stop' else print()
+
+    if job != 'stop':
+        sys.stdout = Logger(job)
+    else:
+        print("job is stoped!")
+
     data_query_path = url_string(data_query_path)
     print("received :",
                         {'job': job, 'model': model, 'groups': groups,

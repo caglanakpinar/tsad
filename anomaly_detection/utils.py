@@ -18,8 +18,12 @@ import urllib
 import time
 from os import listdir
 from os.path import dirname, join
+import pandas as pd
 
-from configs import weekdays, conf, boostrap_ratio
+try:
+    from .configs import weekdays, conf, boostrap_ratio, web_port_default
+except:
+    from configs import weekdays, conf, boostrap_ratio, web_port_default
 
 
 def callfunc(my_file):
@@ -293,6 +297,13 @@ def get_results(date_col):
     if len(results) >= 1000:
         results = results.sort_values(by=date_col, ascending=True)[-1000:]
     return results
+
+
+def find_web_port():
+    web_port = web_port_default
+    while is_port_in_use(web_port):
+        web_port += 1
+    return web_port
 
 
 

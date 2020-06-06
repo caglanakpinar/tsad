@@ -9,8 +9,14 @@ from datetime import datetime
 import time
 import subprocess
 
-from utils import is_port_in_use, read_yaml, write_yaml, show_chart, get_results
-from configs import init_directory, folder_name, web_port_default
+try:
+    from .utils import is_port_in_use, read_yaml, write_yaml, show_chart, get_results, find_web_port
+except:
+    from utils import is_port_in_use, read_yaml, write_yaml, show_chart, get_results, find_web_port
+try:
+    from .configs import init_directory, folder_name, web_port_default
+except:
+    from configs import init_directory, folder_name, web_port_default
 
 
 class CreateDirectory:
@@ -39,6 +45,7 @@ class CreateDirectory:
         self.init_directory = init_directory
         self.remove_existed = remove_existed
         self.folder = join(self.directory, folder_name)
+        self.absolute_path = None
 
     def check_for_directory(self):
         """
@@ -55,16 +62,24 @@ class CreateDirectory:
         It copies files in given directory in to the default folder name which is 'anomaly_detection_framework'
         :param host: local or docker
         """
+        self.absolute_path = abspath(__file__).split("ad_execute.py")[0]
         if exists(self.folder):
             if self.remove_existed:
                 rmtree(self.folder)
+
         if not exists(self.folder):
+            print("files are copied from :", self.absolute_path)
             if host == 'docker':
-                copytree(join(abspath("")), self.folder,
+                copytree(join(self.absolute_path), self.folder,
                          ignore=ignore_patterns('*.ipynb', 'tmp*', "anomaly_detection", '__pycache__'))
             else:
-                copytree(join(abspath("")), self.folder,
-                         ignore=ignore_patterns('*.ipynb', 'tmp*', "anomaly_detection", "*.py", "__pycache__"))
+                copytree(join(self.absolute_path), self.folder,
+                         ignore=ignore_patterns('web', '*.ipynb', 'tmp*', "anomaly_detection", "*.py", "__pycache__"))
+        else:
+            print("Files are existed :", self.folder)
+
+
+
 
     def reset_update_config_directory(self, env, reset=False):
         """
@@ -97,10 +112,13 @@ class CreateDirectory:
                     ins_updated.append(ins)
             if len(ins_updated) == 0 and not reset:
                 instances['instances'] += [{'directory': self.folder,
+                                            'absolute_path': abspath(""),
+                                            'web': find_web_port(),
                                             'id': str(random.random()).replace(".", ""),
                                             'active': True,
                                             'start_date': datetime.now()}]
             write_yaml(init_directory, "instance.yaml", instances)
+
 
             #folder = self.folder
             #self.configs['directory'] = self.folder if not reset else None
@@ -170,7 +188,7 @@ class Configurations:
         :param service_count: number of service which cpecifically assigned for this configuration.
                               By defaults finds available port for each services.
         """
-        from configs import conf
+        from .configs import conf
         if self.cd.check_for_directory():
             count = 0
             available_ports = conf('available_ports')
@@ -216,7 +234,7 @@ class Configurations:
             return  True
 
     def update_api_file(self, apis=None):
-        from configs import conf
+        from .configs import conf
         self.api_file = read_yaml(conf('docs_main_path'), "apis.yaml")
         if apis is not None:
             if not self.master_node:
@@ -258,8 +276,7 @@ class BuildPlatform:
         self.jobs = None
 
     def create_web(self):
-        from web.main import web_service_run
-
+        from .web.main import web_service_run
         if self.master_node:
             thr = threading.Thread(target=web_service_run)
             thr.start()
@@ -274,7 +291,7 @@ class BuildPlatform:
 
     def local_env(self):
         #  create services on local
-        from create_api import api_executor
+        from .create_api import api_executor
         for api in self.api_file:
             thr = threading.Thread(target=api_executor, args=(self.api_file[api], ))
             thr.daemon = True
@@ -290,7 +307,7 @@ class BuildPlatform:
 
     def down_web(self):
         from configs import conf
-        requests.post(url='http://0.0.0.0:' + str(web_port) + '/shutdown')
+        requests.post(url='http://0.0.0.0:' + str(conf('web_port')) + '/shutdown')
 
     def down(self):
         self.down_web()
@@ -350,12 +367,6 @@ class AnomalyDetection:
         self.web_port = None
         self.info_dict = {}
         self.jobs = None
-
-        global recent_directory, web_port
-        recent_directory = path
-        web_port = web_port_default
-        while is_port_in_use(web_port):
-            web_port += 1
 
     def init(self, apis=None):
         if self.conf.check_for_api_and_host(apis=apis):
@@ -500,12 +511,12 @@ class AnomalyDetection:
 
         print("job is created")
 
-    def manage_prediction(self, run=True):
-        self.platform.run_stop_jobs(job='prediction', stop=run)
+    def manage_prediction(self, stop=False):
+        self.platform.run_stop_jobs(job='prediction', stop=stop)
         print("job is created")
 
-    def manage_parameter_tuning(self, run=True):
-        self.platform.run_stop_jobs(job='prediction', stop=run)
+    def manage_parameter_tuning(self, stop=False):
+        self.platform.run_stop_jobs(job='prediction', stop=stop)
         print("job is created")
 
     def create_dashboard(self):

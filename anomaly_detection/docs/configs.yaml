@@ -20,8 +20,8 @@ hyper_parameters:
     batch_count: 8
     batch_size: 16
     epochs: 10
-    l1: 0.03
-    l2: 0.03
+    l1: 0.01
+    l2: 0.01
     lag: 2
     lahead: 2
     lr: 0.04
@@ -35,35 +35,23 @@ hyper_parameters:
     split_ratio: 0.8
 is_from_db: false
 log_main_path: logs
-merged_results: results_20200516.csv
 model_main_path: models
 output_file_name: results
 parameter_tuning:
   iso_f:
-    contamination: 0.01*0.1
-    num_of_trees: 100*1000
+    contamination: 0.1*0.5
+    num_of_trees: 200*1200
   lstm:
     batch_size: 8*24
-    epochs: 5*15
-    l1: 0.01*0.04
-    l2: 0.01*0.04
+    epochs: 5*20
     lag: 2*4
     lahead: 2*4
     lr: 0.01*0.05
     tsteps: 2*4
     units: 4*12
   prophet:
-    changepoint_range: 0.1*0.7
+    changepoint_range: 0.1*0.5
     n_changepoints: 50*300
-path:
-  actual_values: actual_results.csv
-  external: result_selim.csv
-  external_2: result_volkan.csv
-  franchise_info: BayiIlkVeriGoderimTarihi.csv
-  merged_results: results_20200501.csv
-  model_data: data_for_lstm.csv
-  raw: ml3yil_20200429.csv
-  results: results.csv
 port_ranges: 6000*7000
 prediction_date: 2020-03-01
 server: /tmp/mnt

@@ -1,7 +1,7 @@
 parameter_tuning:
   active: false
   api: ml
-  browser_time: 2020-05-30 14
+  browser_time: null
   day: null
   description: null
   execute:
@@ -46,7 +46,7 @@ parameter_tuning:
 prediction:
   active: true
   api: ml
-  browser_time: 2020-05-30 14
+  browser_time: null
   day: null
   description: null
   execute:
@@ -71,7 +71,7 @@ prediction:
 train:
   active: false
   api: ml
-  browser_time: 2020-05-30 14
+  browser_time: null
   day: null
   description: null
   execute:

@@ -4,7 +4,10 @@ from os.path import join, dirname
 from inspect import getmembers, getargspec
 import socket
 
-from utils import callfunc
+try:
+    from utils import callfunc
+except Exception as e:
+    from .utils import callfunc
 
 
 class CreateApi:

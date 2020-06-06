@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 import random
 
-from data_access import GetData
+from data_access import *
 from utils import read_yaml, split_groups, get_results
 from configs import conf
 

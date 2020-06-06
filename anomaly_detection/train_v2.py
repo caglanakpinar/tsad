@@ -1,6 +1,7 @@
 from pandas import DataFrame
 from sklearn.preprocessing import MinMaxScaler
 import os
+import random
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '4'
 import traceback
 from tensorflow.keras.layers import Dense, LSTM, Input
@@ -9,6 +10,7 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.initializers import Ones
 from itertools import product
 from tensorflow.keras.models import model_from_json
+from numpy import arange
 
 from functions import *
 from configs import conf, boostrap_ratio, iteration
@@ -45,18 +47,22 @@ def calculate_batch_count(size, parameters):
     return parameters
 
 
-def get_tuning_params(parameter_tuning, params):
+def get_tuning_params(parameter_tuning, params, job):
     arrays = []
     for p in params:
         if p not in list(parameter_tuning.keys()):
             arrays.append([params[p]])
         else:
             arrays.append(
-                          np.arange(float(parameter_tuning[p].split("*")[0]),
-                                    float(parameter_tuning[p].split("*")[1]),
-                                    float(parameter_tuning[p].split("*")[0])).tolist()
+                          arange(float(parameter_tuning[p].split("*")[0]),
+                                 float(parameter_tuning[p].split("*")[1]),
+                                 float(parameter_tuning[p].split("*")[0])).tolist()
             )
-    return arrays
+    comb_arrays = list(product(*arrays))
+    if job != 'parameter_tuning':
+        return random.sample(comb_arrays, int(len(comb_arrays)*0.5))
+    else:
+        return comb_arrays
 
 
 def get_params(params, comb):
@@ -90,7 +96,7 @@ class TrainLSTM:
         self.sample_size = 30
         self.count = 1
         self.levels = list(product(*[list(self.data[self.data[g] == self.data[g]][g].unique()) for g in self.groups]))
-        self.levels_tuning = list(product(*get_tuning_params(self.hyper_params, self.params)))
+        self.levels_tuning = get_tuning_params(self.hyper_params, self.params, self.job)
         self.logger = LoggerProcess(job=job, model='lstm', total_process=len(self.levels) if job != 'parameter_tuning' else len(self.levels_tuning))
         self.comb = None
         self.is_normalized_feature = check_for_normalization(list(self.data[self.feature]))
@@ -234,7 +240,6 @@ class TrainLSTM:
                                               ).reset_index().sort_values(by=self.date, ascending=True)
         for pr in self.levels_tuning:
             self.params = get_params(self.params, pr)
-            print("hyper parameters : ")
             self.normalization()
             self.batch_size()
             self.data_preparation(is_prediction=False)

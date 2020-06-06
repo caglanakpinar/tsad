@@ -1,46 +1,36 @@
 import datetime
 import yaml
 from os.path import join, abspath
-
+from dateutil.parser import parse
 
 
 init_directory = abspath(__file__).split("configs.py")[0]  # "/".join(abspath(__file__).split("/")[:-1]) + "/"
-
+init_directory2 = abspath("")
 
 def get_directory(path):
-    import ad_execute
-    try:
-        directory = join(ad_execute.recent_directory, folder_name)
-        web = ad_execute.web_port
-    except Exception as e:
-        directory = path
+    with open(join(path, "instance.yaml")) as file:
+        instances = yaml.full_load(file)
+    active_ins = []
+    for ins in instances['instances']:
+        if ins['active'] is True and init_directory2 == ins['absolute_path']:
+            active_ins.append(ins)
+
+    if len(active_ins) == 0:
+        directory = init_directory
         web = 7070
-    #with open(join(path, "instance.yaml")) as file:
-    #    instances = yaml.full_load(file)
-    #active_ins = []
-    #for ins in instances['instances']:
-    #    if ins['active'] is True:
-    #        active_ins.append(ins)
-    #if len(active_ins) == 0:
-    #    directory = init_directory
-    #if len(active_ins) == 1:
-    #    directory = active_ins[0]['directory']
-    #if len(active_ins) > 1:
-    #    now = datetime.datetime.now()
-    #    directories = list(map(lambda x: ((now - parse(x['date'])).total_seconds(), x['directory']), active_ins))
-    #    directory = sorted(directories)[0][1]
+    if len(active_ins) == 1:
+        active = active_ins[0]
+        directory = active['directory']
+        web = active['web']
+    if len(active_ins) > 1:
+        now = datetime.datetime.now()
+        actives = list(map(lambda x: ((now - parse(x['date'])).total_seconds(), x['directory'], 'web'), active_ins))
+        directory = sorted(actives)[0][1]
+        web = sorted(actives)[0][2]
+
     with open(join(directory, "docs", "configs.yaml")) as file:
         config = yaml.full_load(file)
     return config, directory, web
-
-    #with open(join(path, "docs", "configs.yaml")) as file:
-    #    config = yaml.full_load(file)
-    #if config['directory'] is None:
-    #    config['directory'] = init_directory
-    #else:
-    #    with open(join(config['directory'], "", "docs", "configs.yaml")) as file:
-    #        config = yaml.full_load(file)
-    #return config, config['directory']
 
 
 def conf(var):

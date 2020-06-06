@@ -1,8 +1,8 @@
-from pandas import DataFrame, concat
+from pandas import DataFrame
 from fbprophet import Prophet
-from multiprocessing import Pool
-from itertools import product
-from configs import conf
+import random
+from numpy import arange
+
 from functions import *
 from utils import *
 from logger import LoggerProcess
@@ -26,18 +26,22 @@ def get_anomaly_score(anomaly, fact, yhat_upper, yhat_lower):
         return abs((yhat_lower - fact)/ fact)
 
 
-def get_tuning_params(parameter_tuning, params):
+def get_tuning_params(parameter_tuning, params, job):
     arrays = []
     for p in params:
         if p not in list(parameter_tuning.keys()):
             arrays.append([params[p]])
         else:
             arrays.append(
-                          np.arange(float(parameter_tuning[p].split("*")[0]),
-                                    float(parameter_tuning[p].split("*")[1]),
-                                    float(parameter_tuning[p].split("*")[0])).tolist()
+                          arange(float(parameter_tuning[p].split("*")[0]),
+                                 float(parameter_tuning[p].split("*")[1]),
+                                 float(parameter_tuning[p].split("*")[0])).tolist()
             )
-    return arrays
+    comb_arrays = list(product(*arrays))
+    if job != 'parameter_tuning':
+        return random.sample(comb_arrays, int(len(comb_arrays)*0.5))
+    else:
+        return comb_arrays
 
 
 def get_params(params, comb):
@@ -70,7 +74,7 @@ class TrainProphet:
         self.model = None
         self.count = 1
         self.levels = list(product(*[list(self.data[self.data[g] == self.data[g]][g].unique()) for g in self.groups]))
-        self.levels_tuning = list(product(*get_tuning_params(self.hyper_params, self.params)))
+        self.levels_tuning = get_tuning_params(self.hyper_params, self.params, self.job)
         self.logger = LoggerProcess(job=job, model='prophet', total_process=len(self.levels) if job != 'parameter_tuning' else len(self.levels_tuning))
         self.comb = None
         self.prediction = None

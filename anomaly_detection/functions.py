@@ -2,9 +2,6 @@ import pandas as pd
 import numpy as np
 from math import sqrt
 from scipy import stats
-import random
-from os import listdir
-from os.path import dirname
 from itertools import product, combinations
 
 from data_access import GetData
