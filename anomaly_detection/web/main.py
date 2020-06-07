@@ -82,7 +82,6 @@ def web_service_run():
         req = dict(request.form)
         jobs = read_yaml(conf('docs_main_path'), 'ml_execute.yaml')
         process = read_yaml(conf('log_main_path'), 'process.yaml')
-        print(process)
         job_names = list(jobs.keys())
         dates = {j: jobs[j]['job_start_date'] for j in job_names}
         current_active_status = {j: jobs[j]['active'] for j in job_names}
@@ -109,8 +108,6 @@ def web_service_run():
             print("browser time: ", request.args['time'])
             print("server time : ", time.strftime('%A %B, %d %Y %H:%M:%S'))
             jobs = read_yaml(conf('docs_main_path'), 'ml_execute.yaml')
-            print(" ".join(request.args['time'].split()[0:5]))
-            print(datetime.datetime.strptime(" ".join(request.args['time'].split()[0:5]), "%a %b %d %Y %H:%M:%S"))
             for j in jobs:
                 jobs[j]['browser_time'] = str(
                     datetime.datetime.strptime(" ".join(request.args['time'].split()[0:5]), "%a %b %d %Y %H:%M:%S"))[

@@ -38,7 +38,11 @@ def adding_plots_to_pane(plot_id, hover_data, size):
     ], style={'width': str(size) + '%', 'display': 'inline-block', 'padding': '0 90'})
 
 
-get_date = lambda date, date_col: str(date['points'][0]['customdata'])[0:10] if 'customdata' in date['points'][0].keys() else date['points'][0][date_col]
+def get_date(date, date_col):
+    if 'customdata' in date['points'][0].keys():
+        return str(date['points'][0]['customdata'])[0:10]
+    else:
+        return date['points'][0][date_col]
 
 
 def get_descriptives(data, feature):
@@ -57,7 +61,6 @@ def data_source():
                          time_indicator=model_infos['time_indicator'],
                          feature=model_infos['feature'], test=1000)
         source.query_data_source()
-        print()
         source.convert_feature()
         data = source.data
     except Exception as e:

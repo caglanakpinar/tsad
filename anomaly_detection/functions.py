@@ -527,6 +527,12 @@ def check_for_normalization(data):
     return True if 1 > min(data) >= 0 and 1 >= max(data) > 0 else False
 
 
+def get_levels(data, groups):
+    groups = [g for g in groups if g not in [None, '', 'none', 'null', 'None']]
+    return list(product(*[list(data[data[g] == data[g]][g].unique()) for g in groups]))
+
+
+
 
 
 

@@ -214,11 +214,11 @@ def url_string(value, res=False):
         return None
 
 
-def request_url(url, params):
-    url += '?'
-    for p in params:
-
-        url += p + '=' + url_string(str(params[p]), res=True) + '&'
+def request_url(url, params=None):
+    if params is not None:
+        url += '?'
+        for p in params:
+            url += p + '=' + url_string(str(params[p]), res=True) + '&'
     response = 404
     while response != 200:
         try:

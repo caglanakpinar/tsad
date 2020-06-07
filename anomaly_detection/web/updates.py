@@ -17,7 +17,6 @@ def db_connection_update(**args):
     configs['db_connection']['is_from_db'] = False if args['data_source'] in ['csv', 'json', 'pickle'] else True
     infos = {'db': args.get('db_name', None), 'password': args.get('pw', None),
              'port': args.get('port', None), 'server': args.get('host', None), 'user': args.get('user', None)}
-    print(infos)
     for i in infos:
         configs['db_connection'][i] = infos[i]
     write_yaml(conf('docs_main_path'), "configs.yaml", configs)
@@ -26,7 +25,7 @@ def db_connection_update(**args):
 def db_connection_reset(configs):
     for arg in configs['db_connection']:
         configs['db_connection'][arg] = None
-    print("reset db connection information")
+    print("reset db_connection on configs.yaml !! ")
     write_yaml(conf('docs_main_path'), "configs.yaml", configs)
 
 
@@ -49,7 +48,6 @@ def ml_execute_update(**update_dict):
     keys = ['jobs', 'description', 'data_query_path', 'data_source', 'groups', 'dates', 'data_query_path',
             'data_source', 'groups', 'dates', 'time_indicator', 'feature', 'description', 'days']
     infos = {k: update_dict.get(k, None) for k in keys}
-    print("yeesssss")
     jobs = infos['jobs']
     for j in jobs:
         jobs[j]['description'] = infos['description']
@@ -65,8 +63,7 @@ def ml_execute_update(**update_dict):
                     e['params'][p] = infos['days'][j] if infos['days'] else None
             e2.append(e)
         jobs[j]['execute'] = e2
-    print("yesssadadadadadadasdadda")
-    print("update :")
+    print("ml_execute.yaml is updated!!")
     write_yaml(conf('docs_main_path'), "ml_execute.yaml", jobs)
 
 
@@ -83,7 +80,7 @@ def ml_execute_reset(jobs):
                     e['params'][p] = None
             e2.append(e)
         jobs[j]['execute'] = e2
-    print("reset ml-execute")
+    print("reset ml-execute.yaml !!!")
     write_yaml(conf('docs_main_path'), "ml_execute.yaml", jobs)
 
 
@@ -103,7 +100,6 @@ def get_logs(job_names, dates, current_active_status, process):
                       'active': current_active_status[jn],
                       'start_time': datetime.datetime.strptime(dates[jn], '%Y-%m-%d %H:%M') if dates[jn] else '',
                       'percent': calculate_percent(process[jn])} for jn in job_names}
-    print("*****")
     for jn in log_infos:
         if log_infos[jn]['active'] is True:
             log_infos[jn]['status'] = 'waiting' if log_infos[jn]['percent'] == 0 else 'in_progress'
@@ -112,7 +108,6 @@ def get_logs(job_names, dates, current_active_status, process):
 
 def update_logs(jobs, log_infos, req):
     for job_name in jobs:
-        print(list(req.keys()))
         if job_name in list(req.keys()):
             print("fact :")
             print("Job was initialized before.." if jobs[job_name]['active'] is True else "job was stopped or even was not started before..")
@@ -138,7 +133,6 @@ def update_logs(jobs, log_infos, req):
         else:
             log_infos[job_name]['process'] = 'start' if jobs[job_name]['active'] is True else 'stop'
             log_infos[job_name]['status'] = log_infos[job_name]['status'] if jobs[job_name]['active'] is True else 'init'
-    print(log_infos)
     return log_infos
 
 
@@ -164,21 +158,19 @@ def get_request_values(job, params, request):
 
 def get_sample_data(params, connection, create_sample_data=True):
     data, cols = None, None
-    #try:
-    sample_size = 10 if not create_sample_data else 1000
-    d = GetData(data_query_path=params['data_query_path'],
-                data_source=params['data_source'],
-                test=sample_size)
-    print("yessssssssss")
-    d.query_data_source()
-    cols = d.data.columns.values
-    # data = d.data.to_html(classes=["table table-bordered table-striped table-hover table-sm"])
-    if create_sample_data:
-        d.data.to_csv(join(conf('data_main_path'), 'sample_data.csv'))
-    #except Exception as e:
-    #    print(e)
-    #    connection = False
-    print(connection)
+    try:
+        sample_size = 10 if not create_sample_data else 1000
+        d = GetData(data_query_path=params['data_query_path'],
+                    data_source=params['data_source'],
+                    test=sample_size)
+        d.query_data_source()
+        cols = d.data.columns.values
+        # data = d.data.to_html(classes=["table table-bordered table-striped table-hover table-sm"])
+        if create_sample_data:
+            d.data.to_csv(join(conf('data_main_path'), 'sample_data.csv'))
+    except Exception as e:
+        print(e)
+        connection = False
     return data, cols, connection
 
 

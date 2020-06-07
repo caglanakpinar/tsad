@@ -1,8 +1,10 @@
 import setuptools
 from setuptools import find_packages
 
+
 with open("README.md", "r") as fh:
     long_description = fh.read()
+
 
 setuptools.setup(
     name="anomaly_detection_framework",
@@ -13,9 +15,10 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     keywords='anomaly Time Series Anomaly LSTM Prophet Isolation Forest',
-    packages= find_packages(exclude='__pycache__'), #["anomaly_detection"],
+    packages= find_packages(exclude='__pycache__'),
     py_modules=['anomaly_detection', 'anomaly_detection/web'],
     install_requires=[
+        "requests",
         "docker-compose >= 1.25.5",
         "numpy >= 1.18.1",
         "pandas >= 0.25.3",

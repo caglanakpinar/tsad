@@ -8,7 +8,6 @@ from tensorflow.keras.layers import Dense, LSTM, Input
 from tensorflow.keras.optimizers import RMSprop
 from tensorflow.keras.models import Model
 from tensorflow.keras.initializers import Ones
-from itertools import product
 from tensorflow.keras.models import model_from_json
 from numpy import arange
 
@@ -75,14 +74,24 @@ def get_params(params, comb):
 
 
 class TrainLSTM:
-    def __init__(self, job=None, groups=None, time_indicator=None, feature=None, data_source=None, data_query_path=None, time_period=None):
+    def __init__(self,
+                 job=None, groups=None, time_indicator=None, feature=None,
+                 data_source=None, data_query_path=None, time_period=None):
         self.job = job
         self.params = conf('parameters')
         self.query_date = get_query_date(job, params=self.params)
-        self.data, self.groups = data_manipulation(job, self.query_date, time_indicator, feature, data_source, groups, data_query_path)
+        self.data, self.groups = data_manipulation(job=job,
+                                                   date=self.query_date,
+                                                   time_indicator=time_indicator,
+                                                   feature=feature,
+                                                   data_source=data_source,
+                                                   groups=groups,
+                                                   data_query_path=data_query_path)
         self.date = time_indicator
         self.f_w_data = self.data
-        self.split_date = get_split_date(period=None, dates=list(self.data[self.date]), params=self.params)
+        self.split_date = get_split_date(period=None,
+                                         dates=list(self.data[self.date]),
+                                         params=self.params)
         self.hyper_params = conf('parameter_tuning')['lstm']
         self.optimized_parameters = self.params
         self.data_count = 0
@@ -95,9 +104,12 @@ class TrainLSTM:
         self.residuals, self.anomaly = [], []
         self.sample_size = 30
         self.count = 1
-        self.levels = list(product(*[list(self.data[self.data[g] == self.data[g]][g].unique()) for g in self.groups]))
+        self.levels = get_levels(self.data, self.groups)
         self.levels_tuning = get_tuning_params(self.hyper_params, self.params, self.job)
-        self.logger = LoggerProcess(job=job, model='lstm', total_process=len(self.levels) if job != 'parameter_tuning' else len(self.levels_tuning))
+        self.logger = LoggerProcess(job=job,
+                                    model='lstm',
+                                    total_process=len(self.levels)
+                                    if job != 'parameter_tuning' else len(self.levels_tuning))
         self.comb = None
         self.is_normalized_feature = check_for_normalization(list(self.data[self.feature]))
 
@@ -120,7 +132,8 @@ class TrainLSTM:
             self.f_w_data[self.feature_norm] = self.scale.fit_transform(self.f_w_data[[self.feature]])
 
     def split_data(self):
-        self.result = self.f_w_data[self.f_w_data[self.date] >= (self.split_date - calculate_intersect_days(self.params))]
+        self.result = self.f_w_data[self.f_w_data[
+                                        self.date] >= (self.split_date - calculate_intersect_days(self.params))]
 
     def batch_size(self):
         self.params = conf('parameters')
@@ -136,8 +149,6 @@ class TrainLSTM:
     def init_tensorflow(self):
         self.count += 1
         if self.count % 40 == 0:
-            import tensorflow
-            #tensorflow.keras.backend.clear_session()
             from tensorflow.keras.layers import Dense, LSTM, Input
             from tensorflow.keras.optimizers import RMSprop
             from tensorflow.keras.models import Model

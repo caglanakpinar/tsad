@@ -39,11 +39,18 @@ def get_tuning_params(parameter_tuning, params, job):
 
 
 class TrainIForest:
-    def __init__(self, job=None, groups=None, date=None, time_indicator=None, feature=None, data_source=None, data_query_path=None, time_period=None):
+    def __init__(self, job=None, groups=None, time_indicator=None, feature=None,
+                 data_source=None, data_query_path=None, time_period=None):
         self.job = job
         self.params = conf('parameters_2')
         self.query_date = get_query_date(job, period=time_period, dates=None, params=self.params)
-        self.data, self.groups = data_manipulation(job, self.query_date, time_indicator, feature, data_source, groups, data_query_path)
+        self.data, self.groups = data_manipulation(job=job,
+                                                   date=self.query_date,
+                                                   time_indicator=time_indicator,
+                                                   feature=feature,
+                                                   data_source=data_source,
+                                                   groups=groups,
+                                                   data_query_path=data_query_path)
         self.date = time_indicator
         self.f_w_data = self.data
         self.split_date = get_split_date(period=time_period, dates=list(self.data[self.date]), params=self.params)
@@ -53,11 +60,12 @@ class TrainIForest:
         self.anomaly = []
         self.model = None
         self.count = 1
-        self.levels = list(product(*[list(self.data[self.data[g] == self.data[g]][g].unique()) for g in self.groups if g not in [None, '', 'none', 'null', 'None']]))
+        self.levels = get_levels(self.data, self.groups)
         self.levels_tuning = get_tuning_params(self.hyper_params, self.params, self.job)
         self.logger = LoggerProcess(job=job,
                                     model='iso_f',
-                                    total_process=len(self.levels) if job != 'parameter_tuning' else len(self.levels_tuning))
+                                    total_process=len(self.levels)
+                                    if job != 'parameter_tuning' else len(self.levels_tuning))
         self.comb = None
         self.train, self.prediction = None, None
         self.model = None

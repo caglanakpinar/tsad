@@ -3,16 +3,16 @@ from os import popen
 import socket
 from shutil import copytree, rmtree, ignore_patterns
 import threading
-import requests
 from numpy import random
 from datetime import datetime
 import time
 import subprocess
 
+
 try:
-    from .utils import is_port_in_use, read_yaml, write_yaml, show_chart, get_results, find_web_port
+    from .utils import is_port_in_use, read_yaml, write_yaml, show_chart, get_results, find_web_port, request_url
 except:
-    from utils import is_port_in_use, read_yaml, write_yaml, show_chart, get_results, find_web_port
+    from utils import is_port_in_use, read_yaml, write_yaml, show_chart, get_results, find_web_port, request_url
 try:
     from .configs import init_directory, folder_name, web_port_default
 except:
@@ -252,7 +252,6 @@ class Configurations:
         write_yaml(join(self.folder, "docs"), "apis.yaml", self.api_file)
 
     def create_api_file(self, environment):
-        print(self.host)
         if self.cd.check_for_directory():
             self.check_for_ports(service_count=len(self.api_file))
             count = 0
@@ -282,10 +281,8 @@ class BuildPlatform:
             thr.start()
 
     def docker_env(self):
-        print(join(self.conf.folder, "docker-compose.yml") + " up")
         # stream = popen((join(self.conf.folder, "docker-compose.yml") + " up"))
         result = subprocess.run(["docker-compose", "-f", join(self.conf.folder, "docker-compose.yml"), 'up'], stdout=subprocess.PIPE)
-        print(result.stdout)
         # create web
         self.create_web()
 
@@ -307,7 +304,8 @@ class BuildPlatform:
 
     def down_web(self):
         from configs import conf
-        requests.post(url='http://0.0.0.0:' + str(conf('web_port')) + '/shutdown')
+        request_url(url='http://0.0.0.0:' + str(conf('web_port')) + '/shutdown')
+
 
     def down(self):
         self.down_web()
@@ -316,7 +314,7 @@ class BuildPlatform:
         else:
             for s in self.conf.api_file:
                 api = self.conf.api_file[s]
-                requests.post(url='http://' + api['host'] + ':' + str(api['port']) + '/shutdown')
+                request_url(url='http://' + api['host'] + ':' + str(api['port']) + '/shutdown')
                 time.sleep(2)
 
     def create_data_source(self, **args):
@@ -428,7 +426,6 @@ class AnomalyDetection:
             print("This is not the master node which ml_execute service and web application are running.")
 
     def check_available_apis(self):
-        print(self.conf.api_file)
         return self.conf.api_file
 
     def create_data_source(self,
@@ -466,7 +463,6 @@ class AnomalyDetection:
                     print("please makse sure file format is .", data_source_type, " but ", data_query_path, " is not.")
             elif data_source_type == 'googlebigquery':
                 if db.split(".")[-1] == 'json':
-                    print("yess")
                     connection = self.platform.create_data_source(**self.info_dict)
                     print("Data source is created!!!") if connection else print("Connection is refused!!!")
                 else:
@@ -475,20 +471,17 @@ class AnomalyDetection:
             print("Here are the available data connections: ", ", ".join(sources))
 
     def get_ml_dictionary(self, job={}):
-        print(job)
         asd =  {'description': job.get('description', None),
                 "dates": job.get('dates', None),
                 'groups': job.get('groups', None),
                 'time_indicator': job.get('time_indicator', None),
                 'feature': job.get('feature', None),
                 'days': job.get('days', None)}
-        print(asd)
         return asd
 
     def create_jobs(self, jobs):
         if len(jobs.keys()) > 1:
             for job in jobs:
-                print(jobs[job])
                 if None not in [self.get_ml_dictionary(job=jobs[job])[p] for p in ['dates', 'time_indicator', 'feature', 'days']]:
                     self.platform.create_job(job=job, **self.get_ml_dictionary(job=jobs[job]))
                 else:
@@ -503,12 +496,10 @@ class AnomalyDetection:
                     print("**5. If you don`t assign any date to paramter_tuning it will directly start assignin as 1 day after the  train job date.")
         else:
             self.platform.create_job(job=list(jobs.keys())[0], **self.get_ml_dictionary(job=jobs[list(jobs.keys())[0]]))
-
         print("job is created")
 
     def manage_train(self, stop=False):
         self.platform.run_stop_jobs(job='train', stop=stop)
-
         print("job is created")
 
     def manage_prediction(self, stop=False):
