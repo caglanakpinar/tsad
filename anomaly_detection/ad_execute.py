@@ -26,7 +26,7 @@ class CreateDirectory:
 
     1. First, it checks if there is existed folder.
     2. Then, imports files by deleting if it is already existed.
-    3. You may reset folcder to default
+    3. You may reset folder to default
 
     ** Notes **
         - Pls. make sure before stop and rerun the process copy the models, data in a safe folder.
@@ -79,22 +79,33 @@ class CreateDirectory:
             print("Files are existed :", self.folder)
 
 
-
-
     def reset_update_config_directory(self, env, reset=False):
         """
             - It allows us to run platform on given folder, otherwise directory will be the local path.
-            - It updates 'directory' variable at "configs.yaml".
-            - When it checks for the 'directory', it won`t be 'None' after all.
+            - It updates 'instace.yaml' at package where it is installed.
+            - When you run package first it checks the instance.yaml
+              where it is installed in the folder you have installed the package.
+
+        ** instance.yaml **
+        Keeps all running and has been run models in same folder. It allows us to restart each platform
+        from where it is ended.
+            -   directory : where user have assigned on AnomalyDetection(path=....)
+            -   absolute_path : It is the path that you have running the platform
+            -   web : This is the port that available for web insterface
+            -   id : random generated id
+            -   active : is the platform active? are services callable?
+            -   start_date : started date of instance
 
         ** Additional Information **
-        When platform is closed or shutdown,
-        directory variable at 'configs.yaml' is updated back to 'None' in order to get default 'configs.yaml' file.
-        If directory variable == None directory will be 'init_directory'.
+            -   When platform is closed or shutdown;
+                instance.yaml is updating. active is being changed to False.
+            -   If there has not been generated instance at absolute path before;
+                It generates new instance with its parameters.
+                Once the instance created, it can be used later when you have start it in same absolute folder.
 
         :param env: docker, local. if docker == True, no need to to update directory be
                     cause whole .py file are also copied to new folder
-        :param reset: reset updates back to normal 'None' value to derectory variable at configs.yaml
+        :param reset: reset updates back to normal 'False' value to directory variable at instance.yaml
         """
         if env != 'docker':
             instances = read_yaml(init_directory, "instance.yaml")
@@ -120,12 +131,6 @@ class CreateDirectory:
             write_yaml(init_directory, "instance.yaml", instances)
 
 
-            #folder = self.folder
-            #self.configs['directory'] = self.folder if not reset else None
-            #for f in [self.folder, init_directory]:
-            #    write_yaml(join(f, "docs"), "configs.yaml", self.configs)
-
-
 class Configurations:
     """
     This handles the configurations of the Machine Learning Platform. Where to run?
@@ -134,10 +139,10 @@ class Configurations:
     You may also run each platform on nodes or workers.
 
     ****
-    Unless you are runnning on all services on same machine,
+    Unless you are running on all services on same machine,
     you have no specific parameters to assign servers to nodes or worker,
     model services; model_iso_f, model_lstm, model_prophet
-    Machine Learning Service; ml_exeture
+    Machine Learning Service; ml_execute
     ***
 
     Best Features
@@ -157,11 +162,10 @@ class Configurations:
     """
     def __init__(self, path, host='local', remove_existed=False, master_node=True):
         """
-
-        :param path:
-        :param host:
-        :param remove_existed:
-        :param master_node:
+        :param path: folder that user aim to start folder.
+        :param host: local or docker
+        :param remove_existed: if there is a folder which is generated before it removes
+        :param master_node: If it the master node web interface will be initialized.
         """
         self.path = path
         self.host = host

@@ -57,4 +57,7 @@ prediction_date: 2020-03-01
 server: /tmp/mnt
 train_end_date: 2020-01-01
 web_port: 7002
-has_param_tuning_first_run: false
+has_param_tuning_first_run:
+  lstm: false
+  prophet: false
+  iso_f: false

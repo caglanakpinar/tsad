@@ -114,7 +114,7 @@ class TrainIForest:
             print(e)
 
     def train_execute(self):
-        if not conf('has_param_tuning_first_run'):
+        if not conf('has_param_tuning_first_run')['iso_f']:
             self.parameter_tuning()
         for self.comb in self.levels:
             print("*" * 4, "ISO FOREST - ", self.get_query().replace(" and ", "; ").replace(" == ", " - "), "*" * 4)
@@ -152,8 +152,7 @@ class TrainIForest:
                                               aggfunc={self.feature: 'mean'}
                                               ).reset_index().sort_values(by=self.date, ascending=True)
         self.get_outliers_for_tuning_iso_f()
-        for pr in list(product(*get_tuning_params(self.hyper_params, self.params))):
-            print("*" * 4, "ISO FOREST - ", self.get_query().replace(" and ", "; ").replace(" == ", " - "), "*" * 4)
+        for pr in self.levels_tuning:
             print("data size :", len(self.f_w_data))
             self.params = get_params(self.params, pr)
             self.split_data()
@@ -171,7 +170,7 @@ class TrainIForest:
         print("updating model parameters")
         config = read_yaml(conf('docs_main_path'), 'configs.yaml')
         config['hyper_parameters']['prophet'] = self.optimized_parameters
-        config['has_param_tuning_first_run'] = True
+        config['has_param_tuning_first_run']['iso_f'] = True
         write_yaml(conf('docs_main_path'), "configs.yaml", config)
 
 

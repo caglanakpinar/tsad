@@ -9,7 +9,8 @@ from tensorflow.keras.optimizers import RMSprop
 from tensorflow.keras.models import Model
 from tensorflow.keras.initializers import Ones
 from tensorflow.keras.models import model_from_json
-from numpy import arange
+import numpy as np
+from itertools import product
 
 from functions import *
 from configs import conf, boostrap_ratio, iteration
@@ -53,9 +54,9 @@ def get_tuning_params(parameter_tuning, params, job):
             arrays.append([params[p]])
         else:
             arrays.append(
-                          arange(float(parameter_tuning[p].split("*")[0]),
-                                 float(parameter_tuning[p].split("*")[1]),
-                                 float(parameter_tuning[p].split("*")[0])).tolist()
+                          np.arange(float(parameter_tuning[p].split("*")[0]),
+                                    float(parameter_tuning[p].split("*")[1]),
+                                    float(parameter_tuning[p].split("*")[0])).tolist()
             )
     comb_arrays = list(product(*arrays))
     if job != 'parameter_tuning':
@@ -209,7 +210,7 @@ class TrainLSTM:
         print(self.result[['anomaly_score_1', 'ad_label_1','predict'] + self.groups].head())
 
     def train_execute(self):
-        if not conf('has_param_tuning_first_run'):
+        if not conf('has_param_tuning_first_run')['lstm']:
             self.parameter_tuning()
         for self.comb in self.levels:
             print("*" * 4, "LSTM - ", self.get_query().replace(" and ", "; ").replace(" == ", " - "), "*" * 4)
@@ -266,7 +267,7 @@ class TrainLSTM:
         print("updating model parameters")
         config = read_yaml(conf('docs_main_path'), 'configs.yaml')
         config['hyper_parameters']['lstm'] = self.optimized_parameters
-        config['has_param_tuning_first_run'] = True
+        config['has_param_tuning_first_run']['lstm'] = True
         write_yaml(conf('docs_main_path'), "configs.yaml", config)
 
 

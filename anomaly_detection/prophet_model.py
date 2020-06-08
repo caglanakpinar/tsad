@@ -1,7 +1,8 @@
 from pandas import DataFrame, Series
 from fbprophet import Prophet
 import random
-from numpy import arange
+import numpy as np
+from itertools import product
 
 from functions import *
 from utils import *
@@ -31,9 +32,9 @@ def get_tuning_params(parameter_tuning, params, job):
             arrays.append([params[p]])
         else:
             arrays.append(
-                          arange(float(parameter_tuning[p].split("*")[0]),
-                                 float(parameter_tuning[p].split("*")[1]),
-                                 float(parameter_tuning[p].split("*")[0])).tolist()
+                          np.arange(float(parameter_tuning[p].split("*")[0]),
+                                    float(parameter_tuning[p].split("*")[1]),
+                                    float(parameter_tuning[p].split("*")[0])).tolist()
             )
     comb_arrays = list(product(*arrays))
     if job != 'parameter_tuning':
@@ -137,7 +138,7 @@ class TrainProphet:
             print(e)
 
     def train_execute(self):
-        if not conf('has_param_tuning_first_run'):
+        if not conf('has_param_tuning_first_run')['prophet']:
             self.parameter_tuning()
         for self.comb in self.levels:
             print("*" * 4, "PROPHET - ", self.get_query().replace(" and ", "; ").replace(" == ", " - "), "*" * 4)
@@ -166,8 +167,7 @@ class TrainProphet:
         self.f_w_data = self.data.pivot_table(index=self.date,
                                               aggfunc={self.feature: 'mean'}
                                               ).reset_index().sort_values(by=self.date, ascending=True)
-        for pr in list(product(*get_tuning_params(self.hyper_params, self.params))):
-            print(pr)
+        for pr in self.levels_tuning:
             self.params = get_params(self.params, pr)
             print("hyper parameters : ", self.params)
             self.convert_date_feature_column_for_prophet()
@@ -182,7 +182,7 @@ class TrainProphet:
         print("updating model parameters")
         config = read_yaml(conf('docs_main_path'), 'configs.yaml')
         config['hyper_parameters']['prophet'] = self.optimized_parameters
-        config['has_param_tuning_first_run'] = True
+        config['has_param_tuning_first_run']['prophet'] = True
         write_yaml(conf('docs_main_path'), "configs.yaml", config)
 
 

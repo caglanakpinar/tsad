@@ -5,7 +5,7 @@ from scipy import stats
 from itertools import product, combinations
 
 from data_access import GetData
-from configs import conf, time_dimensions, alpha
+from configs import conf, time_dimensions, alpha, day_of_year, time_indicator_accept_threshold, s_size_ratio
 from utils import *
 
 
@@ -77,10 +77,14 @@ class AssignNullValues:
     def check_date_column_is_unique_on_each_group(self):
         if self.groups:
             self.data = self.data.pivot_table(index=self.groups,
-                                              aggfunc={self.time_indicator: 'count', self.time_indicator + '_unique': lambda x: len(x.unique())}).reset_index()
+                                              aggfunc={self.time_indicator: 'count',
+                                                       self.time_indicator + '_unique': lambda x: len(x.unique())}
+                                              ).reset_index()
         else:
             if len(self.data[self.time_indicator]) != len(self.data[self.time_indicator].unique()):
-                self.data = self.data.pivot_table(index=self.time_indicator, aggfunc={self.feature: 'mean'}).reset_index()
+                self.data = self.data.pivot_table(index=self.time_indicator,
+                                                  aggfunc={self.feature: 'mean'}
+                                                  ).reset_index()
 
     def null_value_assign_from_prev_time_steps(self):
         for self.comb in self.levels:
@@ -168,6 +172,10 @@ def smallest_time_part(dates):
     return accepted_t_dimensions, smallest_td  # smallest time indicator not included to time_dimensions
 
 
+def get_time_difference(dates):
+    return (max(dates) - min(dates)).total_seconds()
+
+
 class TimePartFeatures:
     def __init__(self, job=None, data=None, time_indicator=None, groups=None, feature=None):
         self.job = job
@@ -178,11 +186,11 @@ class TimePartFeatures:
         self.time_groups = None
         self.date = time_indicator
         self.feature = feature
+        self.time_diff = get_time_difference(list(self.data[self.time_indicator]))
         self.time_dimensions, self.smallest_time_indicator = smallest_time_part(list(self.data[self.time_indicator]))
         self.time_dimensions_accept = {d: False for d in self.time_dimensions}
-
-    def day_decision(self):
-        return True if self.smallest_time_indicator in ['min', 'second'] else False
+        self.threshold = time_indicator_accept_threshold['threshold']
+        self.accept_ratio_value = time_indicator_accept_threshold['accept_ratio_value']
 
     def remove_similar_time_dimensions(self, part):
         accept = False
@@ -222,8 +230,25 @@ class TimePartFeatures:
             iter = int(min(len(s1), len(s2)) * 0.1)
         return iter
 
+    def get_threshold(self, part):
+        update_values = False
+        if part == 'quarter':
+            if self.time_dimensions_accept['year']:
+                update_values = True
+        if part == 'month':
+            if self.time_dimensions_accept['year'] or self.time_dimensions_accept['quarter']:
+                update_values = True
+        if part == 'week':
+            if len([1 for p in ['year', 'quarter', 'month'] if self.time_dimensions_accept[p]]) != 0:
+                update_values = True
+
+        if update_values:
+            self.threshold = time_indicator_accept_threshold['threshold'] - 0.2
+            self.accept_ratio_value = time_indicator_accept_threshold['accept_ratio_value'] + 0.2
+
     def time_dimension_decision(self, part):
         if self.remove_similar_time_dimensions(part):
+            self.get_threshold(part=part)
             accept_count = 0
             combs = list(combinations(list(self.data[part].unique()), 2))
             for comb in combs:
@@ -233,15 +258,31 @@ class TimePartFeatures:
                 h0_accept_ratio, params = boostraping_calculation(sample1=sample_1,
                                                                   sample2=sample_2,
                                                                   iteration=iter,
-                                                                  sample_size=int(min(len(sample_1), len(sample_2)) * 3 / 5),
+                                                                  sample_size=int(min(len(sample_1), len(sample_2)) * s_size_ratio),
                                                                   alpha=0.05)
-                accept_count += 1 if h0_accept_ratio < 0.9 else 0
-            accept_ratio = len(combs) * 0.5  # 75%
+                accept_count += 1 if h0_accept_ratio < self.threshold else 0
+            accept_ratio = len(combs) * self.accept_ratio_value  # 50%
             print("Time Part :", part, "Accept Treshold :", accept_ratio, "Accepted Count :", accept_count)
             return True if accept_count > accept_ratio else False
 
     def day_decision(self):
         return True if self.smallest_time_indicator in ['min', 'second'] else False
+
+    def year_decision(self):
+        return True if int(self.time_diff / 60 / 60 / 24) >= (day_of_year * 2) else False
+
+    def quarter_decision(self):
+        return True if int(self.time_diff / 60 / 60 / 24) >= (day_of_year * 1) else False
+
+    def check_for_time_difference_ranges_for_accepting_time_part(self, part):
+        decision = True
+        if part == 'year':
+            decision =  self.year_decision()
+        if part == 'quarter':
+            decision = self.quarter_decision()
+        if part == 'week_day':
+            decision = self.day_decision()
+        return decision
 
     def decide_timepart_of_group(self, part):
         print("*"*5, "decision for time part :", part, "*"*5)
@@ -250,10 +291,12 @@ class TimePartFeatures:
         if len(unique) >= 2:
             if 1 not in counts:
                 if part not in ['week_day', 'hour', 'min', 'second']:
-                    result = self.time_dimension_decision(part)
+                    if self.check_for_time_difference_ranges_for_accepting_time_part(part):
+                        result = self.time_dimension_decision(part)
                 else:
                     if part == 'week_day':
-                        result = self.day_decision()
+                        if self.check_for_time_difference_ranges_for_accepting_time_part(part):
+                            result = self.day_decision()
                     if self.smallest_time_indicator == 'second' and part == 'hour':
                         result = self.time_dimension_decision(part)
         print("result :", " INCLUDING" if result else "EXCLUDING")
@@ -530,6 +573,10 @@ def check_for_normalization(data):
 def get_levels(data, groups):
     groups = [g for g in groups if g not in [None, '', 'none', 'null', 'None']]
     return list(product(*[list(data[data[g] == data[g]][g].unique()) for g in groups]))
+
+
+
+
 
 
 

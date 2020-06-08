@@ -7,6 +7,7 @@ from dateutil.parser import parse
 init_directory = abspath(__file__).split("configs.py")[0]  # "/".join(abspath(__file__).split("/")[:-1]) + "/"
 init_directory2 = abspath("")
 
+
 def get_directory(path):
     with open(join(path, "instance.yaml")) as file:
         instances = yaml.full_load(file)
@@ -72,3 +73,11 @@ time_dimensions = ['year', 'quarter', 'month', 'week', 'week_part', 'week_day', 
 weekdays = ['Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays', 'Sundays']
 folder_name = 'anomaly_detection_framework'
 web_port_default = 7002
+day_of_year = 366
+time_indicator_accept_threshold = {
+    'threshold': 0.9, 'accept_ratio_value': 0.5
+}
+s_size_ratio = 0.6
+
+
+
