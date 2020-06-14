@@ -282,6 +282,7 @@ class BuildPlatform:
         from .web.main import web_service_run
         if self.master_node:
             thr = threading.Thread(target=web_service_run)
+            thr.daemon = True
             thr.start()
 
     def docker_env(self):

@@ -94,7 +94,7 @@ class CreateJobs:
     def job_schedule(self):
         print("job is initialized!!!")
         print(self.time)
-        if self.job['day'] not in ['Mondays', 'Every Min', 'Every Second', 'Hourly',
+        if self.job['day'] not in ['Every Min', 'Every Second', 'Hourly',
                                    'only once', 'Weekly']:
             {'Mondays': schedule.every().monday,
              'Tuesdays': schedule.every().tuesday,
@@ -132,7 +132,7 @@ def start_job(job):
                 print("job is stopped !!")
                 break
             time.sleep(60)
-    elif j.job['day'] in ['only once', 'Monthly', 'Every 2 Weeks']:
+    elif j.job['day'] not in ['only once', 'Monthly', 'Every 2 Weeks']:
         j.job_schedule()
         while True:
             schedule.run_pending()
