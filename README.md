@@ -188,48 +188,56 @@ ad.create_data_source(data_source_type='googlebigquery',
 
 Example above, it is created a connector to Google BigQuery by using ***AnomalyDtection*** method.
 
-- **Connection PostgreSQL - MS  SQL** 
+-   **Connection PostgreSQL - MS  SQL** 
 
 ![connection_postgre](https://user-images.githubusercontent.com/26736844/83358571-27ab5200-a37d-11ea-95b9-b91b1ee38269.gif)
 
 ****
 
-- **Connection .csv - .json - .yaml**
+-   **Connection .csv - .json - .yaml**
 
 ![Screen Recording 2020-06-06 at 12 33 AM](https://user-images.githubusercontent.com/26736844/83924666-d1c81700-a78d-11ea-8972-d2c14682440d.gif)
 
 ****
 
-- **Connection Google BigQuery**
+-   **Connection Google BigQuery**
 
 ![Screen Recording 2020-06-06 at 12 49 AM](https://user-images.githubusercontent.com/26736844/83925434-d1308000-a78f-11ea-8753-847e48f73ff7.gif)
 
 ****
 
-- **Create Tasks**
+-   **Create Tasks**
     
-    - ***Model Dimensions :*** You may want to Train your model with separated Groups. The platform automatically finds the date part as dimensions from the ***Date Indicator***. However external dimension can be included by assigning from here.
+    -   ***Model Dimensions :*** You may want to Train your model with separated Groups. The platform automatically finds the date part as dimensions from the ***Date Indicator***. However external dimension can be included by assigning from here.
     
-    - ***Date Indicator :*** You have to specify the date column from your raw data set. ***This is a mandatory field***.
+    
+    -   ***Date Indicator :*** You have to specify the date column from your raw data set. ***This is a mandatory field***.
     
-    - ***Anomaly Feature :*** In order to find the anomaly values, you have to specify which column we are investigating for. ***This is a mandatory field***.
-
-    - ***Train :*** Choose the schedule time period for train task. The chosen period will be started depending on the time where it is assigned at **Train Job Dates - Start***. If **Train Job Dates - Start*** is not assigned, the job date will automatically assign as the current date and it can be started immediately. Parameter Tunning also runs when train task runs for the first time.
-    
-    - ***Prediction :*** As like Train Task, Prediction task also be scheduled similar way. However, you have to assign ***Prediction Job Dates - Start *** while you are creating task.
-    
-    - ***Parameter Tuning :*** Parameter Tuning also is able to be scheduled. However, the starting date is assigning related to ***Train Job Dates - Start***. Parameter tunning also runs when train task runs for the first time.
-    
-    - ***Here are the schedule options :***
-        
-        -   *Daily :* Each day, the job process will start with a given time where you assign at ***Train Job Dates - Start***. 
-        -   *only once :* It can be triggered just once. 
-        -   *Mondays ... Sundays :* Assigned day of the week, the job will start.
-        -   *Weekly :* Job will run every 7 days after it is started.
-        -   *Every 2 Weeks :* 14 days of the time period.
-        -   *Monthly :* every 30 days of the time period.
-        -   *Every Minute :* Every minute job can be triggered. 
-        -   *Every Second :* Every each second job can be triggered. 
+    -   ***Anomaly Feature :*** In order to find the anomaly values, you have to specify which column we are investigating for. ***This is a mandatory field***.
+    
+    -   ***Train :*** Choose the schedule time period for train task. The chosen period will be started depending on the time where it is assigned at **Train Job Dates - Start***. If **Train Job Dates - Start*** is not assigned, the job date will automatically assign as the current date and it can be started immediately. Parameter Tunning also runs when train task runs for the first time.
+    
+    -   ***Prediction :*** As like Train Task, Prediction task also be scheduled similar way. However, you have to assign ***Prediction Job Dates - Start *** while you are creating task.
+    
+    -   ***Parameter Tuning :*** Parameter Tuning also is able to be scheduled. However, the starting date is assigning related to ***Train Job Dates - Start***. Parameter tunning also runs when train task runs for the first time.
+    
+    -   ***Here are the schedule options :***
+        
+        -   *Daily :* Each day, the job process will start with a given time where you assign at ***Train Job Dates - Start***. 
+        
+        -   *only once :* It can be triggered just once. 
+        
+        -   *Mondays ... Sundays :* Assigned day of the week, the job will start.
+        
+        -   *Weekly :* Job will run every 7 days after it is started.
+        
+        -   *Every 2 Weeks :* 14 days of the time period.
+        
+        -   *Monthly :* every 30 days of the time period.
+        
+        -   *Every Minute :* Every minute job can be triggered. 
+        
+        -   *Every Second :* Every each second job can be triggered. 
             
 
 You can create 3 main Machine Learning task which generally uses for each Data Scientist. You may create a task and schedule them separately. For instance, train can run every week, prediction can create outputs daily, and every each month parameters can be optimized by parameter tunning task.
