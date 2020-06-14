@@ -3,6 +3,7 @@ from fbprophet import Prophet
 import random
 import numpy as np
 from itertools import product
+import pandas as pd
 
 from functions import *
 from utils import *
