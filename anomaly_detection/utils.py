@@ -123,6 +123,19 @@ def split_groups(groups):
     return s_groups
 
 
+def get_day_part(hour):
+    if 0 <= hour < 7:
+        return 'night'
+    if 7 <= hour < 12:
+        return 'morning'
+    if 12 <= hour < 17:
+        return 'afternoon'
+    if 17 <= hour < 21:
+        return 'evening1'
+    if 21 <= hour < 24:
+        return 'evening2'
+
+
 def date_part(date, part):
     if part == 'year':
         return date.year
@@ -136,6 +149,8 @@ def date_part(date, part):
         return 1 if date.isoweekday() in [6, 7] else 0
     if part == 'week_day':
         return date.isoweekday()
+    if part == 'day_part':
+        return get_day_part(date.hour)
     if part == 'hour':
         return date.hour
     if part == 'min':
