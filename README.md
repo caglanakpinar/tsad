@@ -9,13 +9,13 @@ _________________
 Anomaly-Detection-Framework is a platform for Time Series Anomaly Detection Problems. Give the data to the platform to get the Anomaly Labels with scheduled time periods. It is such simple is that!!!
 Anomaly-Detection-Framework enables to Data Science communities easy to detect abnormal values on a Time Series Data Set. It is a platform that can run on Docker containers as services or python by using its modules. It also has the web interface which allows us to train - prediction - parameter tuning jobs easily.
 
-#### Key Features
+##### Key Features
 -   **Web Interface**: 
 
     It is a web interface which allows us to connect data source and execute Machine Learning processes. You may create tasks according to your data set. These tasks are train models, Anomaly Detection Prediction, Parameter Tunning For Train Models.
     - *Menu*
-        - [Data Source Configurations](http://127.0.0.1:7002/configs)
-        - [Create Task](http://127.0.0.1:7002/configs)
+        - [Data Source Configuraitons](http://127.0.0.1:7002/configs)
+        - [Crate Task](http://127.0.0.1:7002/configs)
         - [Job Center](http://127.0.0.1:7002/ml_execute)
         - [Dashboard](http//:127.0.0.1:7002/dashboard)
     
@@ -67,21 +67,21 @@ Anomaly-Detection-Framework enables to Data Science communities easy to detect a
 # Running Platform
 
 
-**1. You have to specify your directory**
+**1. You have to specify you directory**
 
 
 ```
 import anomaly_detection as ad_exec
 
-ad = ad_exec.AnomalyDetection(path='./Desktop', environment='local')
+ad = ad_exec.AnomalyDetection(path='./Desktop', environment='local)
 ad.init(apis=None)
 
 ```
 
-Once, you have assigned the path, a folder called ***Anomaly_Detection_Framework*** will be created inside of it. This folder includes models, data, logs, and docs folders. Trained models will be imported to the ***models' *** folder. ***logs*** folder for both ***ml_execute***, ***model_iso_f***, ***model_prophet***, and ***model_lstm*** of log files will be created at logs file. 
-Your ***.csv***, ***.json***, or ***.yaml*** data source file must be copied to the data folder which is at the ***Anomaly_Detection_Framework*** folder. If you are connecting to Google Big Query data source, Big Query API (.json file) must be copied into the "data" folder. Once, prediction jobs have been initialized output .csv file is imported to the ***data*** folder.
+Once, you have assigned the path, a folder called ***Anomaly_Detection_Framework*** will be created inside of it. This folder includes models, data, logs, and docs folders.Trained models will be imported to the ***models*** folder. ***logs*** folder for both ***ml_execute***, ***model_iso_f***, ***model_prophet***, and ***model_lstm*** of log files will be created at logs file. 
+Your ***.csv***, ***.json*** or ***.yaml*** data source file must be copied to the data folder which is at the ***Anomaly_Detection_Framework*** folder. If you are connecting to Google Big Query data source, Big Query API (.json file) must be copied into the "data" folder. Once, prediction jobs have been initialized output .csv file is imported to the ***data*** folder.
 
-The given path will be your workspace where all data-source you can store or get from it. By using "AnomalyDetection" module of ***path*** argument you can specify the path. If there are files which already exists on the given path, you may remove them by using ***remove_existed = True*** (default ***False***)
+The given path will be your workspace where all data-source you can store or get from it. By using "AnomalyDetection" module of ***path*** argument you can specify the path. If there are files which are already exists on the given path, you may remove them by using ***remove_existed = True*** (default ***False***)
 
 
 - ###### ***anomaly_detection.AnomalyDetection***:
@@ -114,7 +114,7 @@ The given path will be your workspace where all data-source you can store or get
         
         ```
         
-        The example above, It will initialize ***model_iso_f*** and ***model_lstm*** services. Both will be run on a given host with given ports. However given ports are used, it will assign another port automatically.
+        Example above, It will initializes ***model_iso_f*** and ***model_lstm*** services. Both will be run on a given host with given ports. However given ports are used, it will assign another port automatically.
 ****
 
 **2. Run The PLatform**
@@ -186,7 +186,7 @@ ad.create_data_source(data_source_type='googlebigquery',
 
 ```
 
-The example above, it is created a connector to Google BigQuery by using ***AnomalyDtection*** method.
+Example above, it is created a connector to Google BigQuery by using ***AnomalyDtection*** method.
 
 -   **Connection PostgreSQL - MS  SQL** 
 
@@ -215,9 +215,9 @@ The example above, it is created a connector to Google BigQuery by using ***Anom
     
     -   ***Anomaly Feature :*** In order to find the anomaly values, you have to specify which column we are investigating for. ***This is a mandatory field***.
     
-    -   ***Train :*** Choose the schedule time period for the training task. The chosen period will be started depending on the time where it is assigned at **Train Job Dates - Start***. If **Train Job Dates - Start*** is not assigned, the job date will automatically assign as the current date and it can be started immediately. Parameter Tunning also runs when train task runs for the first time.
+    -   ***Train :*** Choose the schedule time period for train task. The chosen period will be started depending on the time where it is assigned at **Train Job Dates - Start***. If **Train Job Dates - Start*** is not assigned, the job date will automatically assign as the current date and it can be started immediately. Parameter Tunning also runs when train task runs for the first time.
     
-    -   ***Prediction :*** As like Train Task, the Prediction task also is scheduled similar way. However, you have to assign ***Prediction Job Dates - Start *** while you are creating tasks.
+    -   ***Prediction :*** As like Train Task, Prediction task also be scheduled similar way. However, you have to assign ***Prediction Job Dates - Start *** while you are creating task.
     
     -   ***Parameter Tuning :*** Parameter Tuning also is able to be scheduled. However, the starting date is assigning related to ***Train Job Dates - Start***. Parameter tunning also runs when train task runs for the first time.
     
@@ -237,10 +237,10 @@ The example above, it is created a connector to Google BigQuery by using ***Anom
         
         -   *Every Minute :* Every minute job can be triggered. 
         
-        -   *Every Second :* Every second job can be triggered. 
+        -   *Every Second :* Every each second job can be triggered. 
             
 
-You can create 3 main Machine Learning tasks which generally uses for each Data Scientist. You may create a task and schedule them separately. For instance, a train can run every week, prediction can create outputs daily, and every each month parameters can be optimized by parameter tunning task.
+You can create 3 main Machine Learning task which generally uses for each Data Scientist. You may create a task and schedule them separately. For instance, train can run every week, prediction can create outputs daily, and every each month parameters can be optimized by parameter tunning task.
 
 This process is only available after Data Source is created.
 Once you create the data source you can see the column names on ***Model Dimensions***, ***Date Indicator***, ***Anomaly Feature***.
