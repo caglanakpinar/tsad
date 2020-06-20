@@ -197,17 +197,24 @@ class TrainLSTM:
         self.result['residuals'] = self.result.apply(lambda row:
                                                      calculate_residuals(row[self.feature], row['predict']),
                                                      axis=1)
-        a_score = AnomalyScore(data=self.result,
-                               feature=self.feature,
-                               s_size=get_sample_size(len(self.result)),
-                               iteration=iteration)
-        a_score.create_iterations()
-        self.result['anomaly_score_1'] = self.result.apply(
-            lambda row: a_score.calculate_beta_pdf(value=row['residuals'], idx=row['index']), axis=1)
+        try:
+            a_score = AnomalyScore(data=self.result,
+                                   feature=self.feature,
+                                   s_size=get_sample_size(len(self.result)),
+                                   iteration=iteration)
+            a_score.create_iterations()
+            self.result['anomaly_score_1'] = self.result.apply(
+                lambda row: a_score.calculate_beta_pdf(value=row['residuals'], idx=row['index']), axis=1)
+
+        except Exception as e:
+            print(e)
+            a_score = AnomalyScore(data=self.result,
+                                   feature=self.feature, s_size=len(self.result))
+            self.result['anomaly_score_1'] = a_score.outlier_detection()
         self.result['ad_label_1'] = self.result['anomaly_score_1'].apply(lambda x: 1 if x < 0.05 or x > 0.95 else 0)
-        self.anomaly += self.result[['anomaly_score_1', 'ad_label_1', 'residuals', 'predict', self.date] +
-                                    self.groups].to_dict('results')
-        print(self.result[['anomaly_score_1', 'ad_label_1','predict'] + self.groups].head())
+        self.anomaly += self.result[['anomaly_score_1', 'ad_label_1',
+                                     'residuals', 'predict', self.date] + self.groups].to_dict('results')
+        print(self.result[['anomaly_score_1', 'ad_label_1', 'predict'] + self.groups].head())
 
     def train_execute(self):
         if not conf('has_param_tuning_first_run')['lstm']:
@@ -233,12 +240,15 @@ class TrainLSTM:
         for self.comb in self.levels:
             self.f_w_data = self.data.query(self.get_query()).sort_values(by=self.date)
             if check_model_exists(model_path(self.comb, self.groups, 'lstm'), conf('model_main_path')):
-                self.normalization()
-                self.split_data()
-                if len(self.result) != 0:
-                    self.data_preparation(is_prediction=True)
-                    self.anomaly_prediction()
-                    self.assign_anomaly_score_and_label()
+                try:
+                    self.normalization()
+                    self.split_data()
+                    if len(self.result) != 0:
+                        self.data_preparation(is_prediction=True)
+                        self.anomaly_prediction()
+                        self.assign_anomaly_score_and_label()
+                except Exception as e:
+                    print(e)
             self.logger.counter()
             if not check_request_stoped(self.job):
                 break

@@ -43,7 +43,8 @@ class AssignNullValues:
         self.comb = None
         self.timestamps = list(range(4))
         self.columns = list(self.data_raw.columns)
-        self.levels = list(product(*[list(self.data_raw[self.data_raw[g] == self.data_raw[g]][g].unique()) for g in self.groups]))
+        self.levels = list(
+            product(*[list(self.data_raw[self.data_raw[g] == self.data_raw[g]][g].unique()) for g in self.groups]))
         self.data = []
 
     def get_query(self):
@@ -114,11 +115,11 @@ def calculate_t_test(mean1, mean2, var1, var2, n1, n2, alpha):
     # Two Sample T Test (M0 == M1) (Two Tails)
     t = (mean1 - mean2) / sqrt((var1 / n1) + (var2 / n2))  # t statistic calculation for two sample
     df = n1 + n2 - 2  # degree of freedom for two sample t - set
-    pval = 1 - stats.t.sf(np.abs(t), df)*2  # two-sided pvalue = Prob(abs(t)>tt) # p - value
+    pval = 1 - stats.t.sf(np.abs(t), df) * 2  # two-sided pvalue = Prob(abs(t)>tt) # p - value
     cv = stats.t.ppf(1 - (alpha / 2), df)
     standart_error = cv * sqrt((var1 / n1) + (var2 / n2))
     confidence_intervals = [abs(mean1 - mean2) - standart_error, abs(mean1 - mean2) + standart_error, standart_error]
-    acception = 'HO REJECTED!' if pval < (alpha / 2) else 'HO ACCEPTED!' # left tail
+    acception = 'HO REJECTED!' if pval < (alpha / 2) else 'HO ACCEPTED!'  # left tail
     acception = 'HO REJECTED!' if pval > 1 - (alpha / 2) else 'HO ACCEPTED!'  # right tail
     return pval, confidence_intervals, acception
 
@@ -146,12 +147,14 @@ def boostraping_calculation(sample1, sample2, iteration, sample_size, alpha):
     """
     pval_list, h0_accept_count, test_parameters_list = [], 0, []
     for i in range(iteration):
-        random1 = sampling(sample=sample1, sample_size=sample_size) # random.sample(sample1, sample_size)  # randomly picking samples from sample 1
-        random2 = sampling(sample=sample2, sample_size=sample_size) #random.sample(sample2, sample_size)  # randomly picking samples from sample 2
+        random1 = sampling(sample=sample1,
+                           sample_size=sample_size)  # random.sample(sample1, sample_size)  # randomly picking samples from sample 1
+        random2 = sampling(sample=sample2,
+                           sample_size=sample_size)  # random.sample(sample2, sample_size)  # randomly picking samples from sample 2
         mean1, mean2 = np.mean(random1), np.mean(random2)
         var1, var2 = np.var(random1), np.var(random2)
         pval, confidence_intervals, hypotheses_accept = calculate_t_test(mean1, mean2, var1, var2, sample_size,
-                                                                          sample_size, alpha)
+                                                                         sample_size, alpha)
         h0_accept_count += 1 if hypotheses_accept == 'HO ACCEPTED!' else 0
     return h0_accept_count / iteration, pd.DataFrame(test_parameters_list)
 
@@ -168,7 +171,7 @@ def smallest_time_part(dates):
             smallest_td = t_dimensions[count]
             break
         count += 1
-    accepted_t_dimensions = list(reversed(t_dimensions[count+1:]))
+    accepted_t_dimensions = list(reversed(t_dimensions[count + 1:]))
     return accepted_t_dimensions, smallest_td  # smallest time indicator not included to time_dimensions
 
 
@@ -212,14 +215,17 @@ class TimePartFeatures:
         if part == 'week_part':
             if self.smallest_time_indicator in ['day', 'hour']:
                 accept = True
-                print("accept for week_part", accept)
         if part == 'week_day':
             if self.smallest_time_indicator in ['hour', 'min', 'second']:
                 if not self.time_dimensions_accept['week_part']:
                     accept = True
+        if part == 'day_part':
+            if self.smallest_time_indicator in ['min', 'second']:
+                accept = True
         if part == 'hour':
             if self.smallest_time_indicator == 'second':
-                accept = True
+                if not self.time_dimensions_accept['day_part']:
+                    accept = True
         return accept
 
     def iteration_count(self, s1, s2):
@@ -258,7 +264,8 @@ class TimePartFeatures:
                 h0_accept_ratio, params = boostraping_calculation(sample1=sample_1,
                                                                   sample2=sample_2,
                                                                   iteration=iter,
-                                                                  sample_size=int(min(len(sample_1), len(sample_2)) * s_size_ratio),
+                                                                  sample_size=int(
+                                                                      min(len(sample_1), len(sample_2)) * s_size_ratio),
                                                                   alpha=0.05)
                 accept_count += 1 if h0_accept_ratio < self.threshold else 0
             accept_ratio = len(combs) * self.accept_ratio_value  # 50%
@@ -275,9 +282,9 @@ class TimePartFeatures:
         return True if int(self.time_diff / 60 / 60 / 24) >= (day_of_year * 1) else False
 
     def check_for_time_difference_ranges_for_accepting_time_part(self, part):
-        decision = True
+        decision = False
         if part == 'year':
-            decision =  self.year_decision()
+            decision = self.year_decision()
         if part == 'quarter':
             decision = self.quarter_decision()
         if part == 'week_day':
@@ -285,7 +292,7 @@ class TimePartFeatures:
         return decision
 
     def decide_timepart_of_group(self, part):
-        print("*"*5, "decision for time part :", part, "*"*5)
+        print("*" * 5, "decision for time part :", part, "*" * 5)
         result = False
         (unique, counts) = np.unique(list(self.data[part]), return_counts=True)
         if len(unique) >= 2:
@@ -295,8 +302,7 @@ class TimePartFeatures:
                         result = self.time_dimension_decision(part)
                 else:
                     if part == 'week_day':
-                        if self.check_for_time_difference_ranges_for_accepting_time_part(part):
-                            result = self.day_decision()
+                        results = self.check_for_time_difference_ranges_for_accepting_time_part(part)
                     if self.smallest_time_indicator == 'second' and part == 'hour':
                         result = self.time_dimension_decision(part)
         print("result :", " INCLUDING" if result else "EXCLUDING")
@@ -322,7 +328,8 @@ class TimePartFeatures:
                     }
             write_yaml(conf('model_main_path'), 'model_configuration.yaml', info)
         else:
-            self.time_groups = read_yaml(conf('model_main_path'), "model_configuration.yaml")['infos']['time_groups'].split("*")
+            self.time_groups = read_yaml(conf('model_main_path'), "model_configuration.yaml")['infos'][
+                'time_groups'].split("*")
             for t_dimension in self.time_groups:
                 if t_dimension not in self.groups:
                     self.data[t_dimension] = self.data[self.date].apply(lambda x: date_part(x, t_dimension))
@@ -342,6 +349,7 @@ class DimensionsCorrelation:
         self.feature = feature
         self.time_dimensions, self.smallest_time_indicator = smallest_time_part(list(self.data[self.time_indicator]))
         self.time_dimensions_accept = {d: False for d in self.time_dimensions}
+
 
 reshape_3 = lambda x: x.reshape((x.shape[0], x.shape[1], 1))
 reshape_2 = lambda x: x.reshape((x.shape[0], 1))
@@ -364,7 +372,7 @@ def data_preparation(df, f, parameters, is_prediction):
     shift_day = int(parameters['lahead'] / parameters['lag'])
     if parameters['lahead'] > 1:
         for i, c in enumerate(x.columns):
-            x[c] = x[c].shift(i*shift_day)  # every each same days of shifted
+            x[c] = x[c].shift(i * shift_day)  # every each same days of shifted
     x = drop_calculation(x, parameters, is_prediction=is_prediction)
     y = drop_calculation(y, parameters, is_prediction=is_prediction)
     return split_data(y, x, parameters) if not is_prediction else reshape_3(x.values)
@@ -376,6 +384,15 @@ def split_data(Y, X, params):
     x_test = reshape_3(X[-int(params['batch_count'] * params['batch_size']):].values)
     y_test = reshape_2(Y[-int(params['batch_count'] * params['batch_size']):].values)
     return {'x_train': x_train, 'y_train': y_train, 'x_test': x_test, 'y_test': y_test}
+
+
+def get_randoms(sample, s_size):
+    try:
+        if len(sample) != 0:
+            return random.sample(sample, s_size)
+    except Exception as e:
+        print(e)
+        return sample
 
 
 class AnomalyScore:
@@ -395,16 +412,19 @@ class AnomalyScore:
     :return: HO_accept ratio: num of accepted testes / iteration
              result data set: each iteration of test outputs of pandas data frame
     """
+
     def __init__(self, data, feature, iteration, s_size):
-        self.data = list(data['residuals'].fillna(0))
-        self.sample = list(data[data[feature] == data[feature]]['residuals'])
+        self.data = list(data['residuals'].fillna(0))  # assign 0 which indicates mean(residuals) ~= 0
+        self.sample_mean = np.median(data[data[feature] == data[feature]]['residuals'])
+        self.sample = list(data[data[feature] == data[feature]]['residuals'].fillna(self.sample_mean))
         self.iteration = iteration
-        self.s_size = s_size
+        self.s_size = s_size if len(self.sample) > s_size else len(self.sample) - 2
         self.mean = None
         self.scaled_values = {}
         self.a, self.b = 1, 1
         self.iter_samples = {}
         self.min_max_norm_vals = []
+        print("sample size :", s_size)
 
     def create_mean_p_value(self):
         count = 0
@@ -417,7 +437,9 @@ class AnomalyScore:
     def create_iterations(self):
         self.create_mean_p_value()
         for iter in range(self.iteration):
-            _r_values = random.sample(self.sample, self.s_size)
+            _r_values = get_randoms(self.sample, self.s_size)
+            if len(_r_values) == 0:
+                _r_values = self.sample
             _min, _max = min(_r_values), max(_r_values)
             self.iter_samples[iter] = {
                 'mean': np.mean([min_max_scaling(i, _min, (_max - _min)) for i in _r_values]),
@@ -438,6 +460,10 @@ class AnomalyScore:
             self.b += int(self.s_size * _p_value_2) if _p_value_2 == _p_value_2 else 0
             self.a += int(self.s_size * (1 - _p_value_2)) if _p_value_2 == _p_value_2 else self.s_size
         return stats.beta.ppf(p_value, self.a, self.b)
+
+    def outlier_detection(self):
+        cal_t_value = lambda x: abs(x - np.mean(self.data)) / sqrt(np.var(self.data) / len(self.data))
+        return [stats.t.sf(np.abs(cal_t_value(val)), len(self.data) - 1) * 2 for val in self.data]
 
 
 def calculation_as(sample, iteration, s_size, value):
@@ -469,7 +495,8 @@ def calculation_as(sample, iteration, s_size, value):
             _mean = np.mean([min_max_scaling(i, min(_r_values), (max(_r_values) - min(_r_values))) for i in _r_values])
             _p_value_2 = 1
             if max(_r_values) > value > min(_r_values):
-                _p_value_1 = min_max_scaling(value, min(_r_values), (max(_r_values) - min(_r_values)))  # Normal Distribution P-Value
+                _p_value_1 = min_max_scaling(value, min(_r_values),
+                                             (max(_r_values) - min(_r_values)))  # Normal Distribution P-Value
                 _p_value_2 = (0.5 + _p_value_1) / 1 if _p_value_1 < _mean else _p_value_1
             b += int(s_size * _p_value_2) if _p_value_2 == _p_value_2 else 0
             a += int(s_size * (1 - _p_value_2)) if _p_value_2 == _p_value_2 else s_size
@@ -500,9 +527,8 @@ def check_model_exists(model_path, path=None):
         return False
 
 
-def calculate_predict_label(l_1, l_2, l_3):
-    print(l_1, l_2, l_3)
-    labels = list(filter(lambda x: x == x, [l_1, l_2, l_3]))
+def calculate_predict_label(row, columns):
+    labels = [row['ad_label_' + str(i)] for i in range(1, 4) if 'ad_label_' + str(i) in columns]
     if len(labels) == 0:
         return 2
     if len(labels) == 1:
@@ -514,13 +540,14 @@ def calculate_predict_label(l_1, l_2, l_3):
 
 
 def final_label_anomaly(data):
+    cols = list(data.columns)
     data['predicted_label'] = data.apply(lambda row:
-                                                    calculate_predict_label(row['ad_label_1'], row['ad_label_2'],
-                                                                            row['ad_label_3']), axis=1)
+                                         calculate_predict_label(row, cols), axis=1)
     return data
 
 
-def merged_models(model_1, model_2, model_3, date, data_source, data_query_path, time_indicator, groups, time_period, feature):
+def merged_models(model_1, model_2, model_3, date, data_source, data_query_path, time_indicator, groups, time_period,
+                  feature):
     groups = split_groups(groups)
     split_date = get_split_date(period=time_period)
     data_process = GetData(data_source=data_source,
@@ -556,8 +583,9 @@ def get_outliers(values):
 def save_model_configurations(job, data, time_indicator, time_groups):
     info = {}
     if job == 'prediction':
-        info = {'infos': {'min_date': min(list(data[time_indicator])), 'max_date': max(list(data[time_indicator])), 'time_groups': time_groups}
-        }
+        info = {'infos': {'min_date': min(list(data[time_indicator])), 'max_date': max(list(data[time_indicator])),
+                          'time_groups': time_groups}
+                }
         with open(join(conf('model_main_path'), "model_configuration.yaml"), 'w') as file:
             yaml.dump(info, file)
 

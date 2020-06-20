@@ -6,10 +6,15 @@ import plotly.graph_objs as go
 import pandas as pd
 import numpy as np
 import random
+import datetime
 
-from data_access import *
-from utils import read_yaml, split_groups, get_results
+from data_access import GetData
+from utils import read_yaml, split_groups, get_results, date_part
 from configs import conf
+
+
+convert_date = lambda x:  datetime.datetime.strptime(str(x)[0:19], "%Y-%m-%d %H:%M:%S")
+get_date = lambda date, date_col: str(date['points'][0]['customdata'])[0:10] if 'customdata' in date['points'][0].keys() else date['points'][0][date_col]
 
 
 def adding_filter(filter_id, labels, size, is_multi_select, value):
@@ -38,13 +43,6 @@ def adding_plots_to_pane(plot_id, hover_data, size):
     ], style={'width': str(size) + '%', 'display': 'inline-block', 'padding': '0 90'})
 
 
-def get_date(date, date_col):
-    if 'customdata' in date['points'][0].keys():
-        return str(date['points'][0]['customdata'])[0:10]
-    else:
-        return date['points'][0][date_col]
-
-
 def get_descriptives(data, feature):
     output = []
     for metric in [(np.mean, 'mean'), (max, 'max'), (min, 'min'), (np.median, 'median'), (np.median, 'median')]:
@@ -69,10 +67,21 @@ def data_source():
     return data
 
 
+def check_for_time_part_groups_on_data(data, t_dimensions, time_indicator):
+    if len(t_dimensions) != 0:
+        for t_dimension in t_dimensions:
+            data[t_dimension] = data[time_indicator].apply(lambda x: date_part(convert_date(x), t_dimension))
+    return data
+
+
 def get_filters(data):
     jobs = read_yaml(conf('docs_main_path'), 'ml_execute.yaml')
+    #model_conf = read_yaml(conf('model_main_path'), 'model_configuration.yaml')
     model_infos = jobs[list(jobs.keys())[0]]['execute'][0]['params']
     groups, date_col, feature = split_groups(model_infos['groups']), model_infos['time_indicator'], model_infos['feature']
+    #t_dimensions = model_conf['infos']['time_groups'].split("*")
+    #data = check_for_time_part_groups_on_data(data, t_dimensions, date_col)
+    #groups += t_dimensions
     if groups not in ['None', None, []]:
         if len(groups) > 3:
             groups = random.sample(groups, 3)
@@ -94,7 +103,7 @@ def get_filters(data):
     values = ['ALL'] * num_f_p
     filters = list(zip(filter_ids, filter_datas, filter_sizes, multiple_selection, values))
     hover_data = [{date_col: min(data[model_infos['time_indicator']])}] * 3
-    return num_f_p, filters, hover_data, groups, filter_ids, date_col, feature
+    return num_f_p, filters, hover_data, groups, filter_ids, date_col, feature, data
 
 
 def get_updated_filters(filter, filter_index):
@@ -107,7 +116,7 @@ def create_dashboard(server):
     app = dash.Dash(__name__, server=server, external_stylesheets=external_stylesheets, routes_pathname_prefix='/dash/')
     try:
         data = data_source()
-        num_f_p, filters, hover_datas, groups, filter_ids, date_col, feature = get_filters(data)
+        num_f_p, filters, hover_datas, groups, filter_ids, date_col, feature, data = get_filters(data)
         app.layout = html.Div()
         if len(data) == 0:
             return app
@@ -144,7 +153,7 @@ def create_dashboard(server):
     )
     def update_graph(*args):
         data = data_source()
-        filter_ids, date_col, feature = get_filters(data)[4:]
+        filter_ids, date_col, feature = get_filters(data)[4:-1]
         type_converter = lambda filter: "'" if type(list(data[filter])[0]) == str else " "
         for f in range(len(filter_ids)):
             filter = filter_ids[f]
@@ -168,7 +177,7 @@ def create_dashboard(server):
     )
     def update_graph(*args):
         data = data_source()
-        filter_ids, date_col, feature = get_filters(data)[4:]
+        filter_ids, date_col, feature = get_filters(data)[4:-1]
         type_converter = lambda filter: "'" if type(list(data[filter])[0]) == str else " "
         for f in range(len(filter_ids)):
             filter = filter_ids[f]
@@ -189,7 +198,7 @@ def create_dashboard(server):
     )
     def update_graph(*args):
         data = data_source()
-        filter_ids, date_col, feature = get_filters(data)[4:]
+        filter_ids, date_col, feature = get_filters(data)[4:-1]
         type_converter = lambda filter: "'" if type(list(data[filter])[0]) == str else " "
         for f in range(len(filter_ids)):
             filter = filter_ids[f]
