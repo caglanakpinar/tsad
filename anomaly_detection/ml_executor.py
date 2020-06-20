@@ -14,7 +14,7 @@ def read_yaml(directory, filename):
 
 
 def get_api_url(host, port, api_name):
-    host = '0.0.0.0' if host is None else host
+    host = '127.0.0.1' if host is None else host
     return "http://" + host + ":" + str(port) + "/" + api_name
 
 
