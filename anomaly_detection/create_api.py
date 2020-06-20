@@ -3,6 +3,7 @@ from multiprocessing import Process
 from os.path import join, dirname
 from inspect import getmembers, getargspec
 import socket
+import threading
 
 try:
     from utils import callfunc
@@ -15,7 +16,7 @@ class CreateApi:
         self.function = function
         self.parameters = parameters
         self.api_name = api_name
-        self.host = socket.gethostname() if host is None else host
+        self.host = '127.0.0.1' if host is None else host
         self.port = port
 
     def init_api(self):
@@ -26,21 +27,16 @@ class CreateApi:
 
         @app.route('/' + api)
         def render_script():
-            # Create a daemonic process with heavy "my_func"
-            heavy_process = Process(
-                                    target=run_ml_executor,
-                                    daemon=True
-                                    )
-            heavy_process.start()
-            return Response(mimetype='application/json', status=200)
-
-        def run_ml_executor():
             for p in params:
                 if p in request.args.keys():
                     params[p] = request.args[p]
+                else:
+                    params[p] = None
 
+            heavy_process = threading.Thread(target=function, daemon=True, kwargs=params)
+            heavy_process.start()
             print("sent :", params)
-            return {api: function(**params)}
+            return Response(mimetype='application/json', status=200)
 
         @app.route('/shutdown', methods=['POST'])
         def shutdown():

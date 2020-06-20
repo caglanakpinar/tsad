@@ -253,5 +253,46 @@ You can not create tasks separately.
 - **Job Run**
 
 
-![Screen Recording 2020-06-06 at 01 25 AM](https://user-images.githubusercontent.com/26736844/83927175-cc21ff80-a794-11ea-885b-e7ec5bd38097.gif)
+Once, you create tasks, jobs are eligible to run periodically. You can also run below codes rather than using application interface;
+
+```
+ad.manage_train(stop=False)
+ad.manage_prediction(stop=False)
+ad.manage_parameter_tuning(stop=False)
+
+```
+
+*** AnomalyDetection.manage_train :***
+
+    ***-   stop :*** If False stops running training scheduled task.
+
+*** AnomalyDetection.manage_prediction :***
+
+    ***-   stop :*** If False stops running prediction scheduled task.
+    
+    
+*** AnomalyDetection.manage_parameter_tuning :***
+
+    ***-   stop :*** If False stops running parameter tuning scheduled task.
+    
+    
+![Job Run 2020-06-06 at 01 25 AM](https://user-images.githubusercontent.com/26736844/83927175-cc21ff80-a794-11ea-885b-e7ec5bd38097.gif)
+
+
+- **Dashboard**
+
+Once you assign the data source connection and create the task automatically, the dashboard will be created directly according to the model dimension.
+After ***Data Source*** and ***Create Task*** are done, in order to initialize the platform with the code below;
+
+```
+
+ad = anomaly_detection.Ad_execute.AnomalyDetection(path='./Desktop', environment='local').reset_web_app()
+ad.reset_web_app()
+
+```
+
+![Dashboard 2020-06-20 at 05 03 PM](https://user-images.githubusercontent.com/26736844/85203715-3b146200-b318-11ea-8e01-7c074db804e3.gif)
+
+
+
 

@@ -7,6 +7,7 @@ from numpy import random
 from datetime import datetime
 import time
 import subprocess
+from dateutil.parser import parse
 
 
 try:
@@ -262,8 +263,8 @@ class Configurations:
             for s in self.api_file:
                 print("available port for service :", s, " - ", str(self.ports[count]))
                 self.api_file[s]['port'] = self.ports[count]
-                self.api_file[s]['host_create'] = socket.gethostname() if self.host != 'docker' else '0.0.0.0'
-                self.api_file[s]['host'] = socket.gethostname() if self.host != 'docker' else '0.0.0.0'
+                self.api_file[s]['host_create'] = '127.0.0.1' if self.host != 'docker' else '0.0.0.0'
+                self.api_file[s]['host'] = '127.0.0.1' if self.host != 'docker' else '0.0.0.0'
                 if self.host != 'local' and environment != 'docker':
                     self.api_file[s]['host'] = self.check_for_host(s, count)
                 count += 1
@@ -534,7 +535,16 @@ class AnomalyDetection:
         results = results if filter is None else results.query(filter)
         show_chart(results, time_indicator, 'predict', feature, is_bar_chart=False)
 
-    def show_anomaly_detection(self):
+    def show_anomaly_detection(self, dates=None):
+        if self.jobs is None:
+            from configs import conf
+            self.jobs = read_yaml(conf('docs_main_path'), "ml_execute.yaml")
+        time_indicator = self.jobs['prediction']['execute'][0]['params']['time_indicator']
+        feature = self.jobs['prediction']['execute'][0]['params']['feature']
+        results = get_results(time_indicator)
+        if dates is not None
+            results = results[results[time_indicator] >= parse(dates[0]) & results[time_indicator] <= parse(dates[1])]
+        show_chart(results, time_indicator, 'predict', feature, is_bar_chart=False)
         print("")
 
 
