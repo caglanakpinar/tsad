@@ -105,9 +105,9 @@ class TrainIForest:
         try:
             self.model = model_from_to_pkl(directory=conf('model_main_path'),
                                            path=model_path(self.comb, self.groups, 'iso_f'))
-            self.prediction['ad_label_2'] = self.model.predict(self.prediction[[self.feature]].fillna(0).values)
+            self.prediction['ad_label_2'] = self.model.fit_predict(self.prediction[[self.feature]].fillna(0).values)
             self.prediction['anomaly_score_2'] = self.model.score_samples(self.prediction[[self.feature]].fillna(0).values)
-            self.prediction['ad_label_2'] = self.prediction['ad_label_2'].apply(lambda x: 1 if x != 0 else 0)
+            self.prediction['ad_label_2'] = self.prediction['ad_label_2'].apply(lambda x: 1 if x == -1 else 0)
             self.anomaly += self.prediction[['ad_label_2', self.date, 'anomaly_score_2'] + self.groups].to_dict("results")
             print(self.prediction[['ad_label_2', self.date, 'anomaly_score_2'] + self.groups].head())
         except Exception as e:
@@ -172,6 +172,7 @@ class TrainIForest:
         config['hyper_parameters']['prophet'] = self.optimized_parameters
         config['has_param_tuning_first_run']['iso_f'] = True
         write_yaml(conf('docs_main_path'), "configs.yaml", config)
+        self.params = conf('parameters_2')
 
 
 
