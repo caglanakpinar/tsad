@@ -29,10 +29,12 @@ hyper_parameters:
     tsteps: 2
     units: 8
   prophet:
-    changepoint_range: 0.6
-    interval_width: 0.99
-    n_changepoints: 250
+    contamination: 0.30000000000000004
+    interval_width: 0.95
+    num_of_trees: 200
     split_ratio: 0.8
+    changepoint_range: 0.1
+    n_changepoints: 50
 is_from_db: false
 log_main_path: logs
 model_main_path: models
@@ -51,6 +53,7 @@ parameter_tuning:
     units: 4*12
   prophet:
     changepoint_range: 0.1*0.5
+    interval_width: 0.9*0.95
     n_changepoints: 50*300
 port_ranges: 6000*7000
 prediction_date: 2020-03-01

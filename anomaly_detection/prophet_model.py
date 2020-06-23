@@ -104,15 +104,17 @@ class TrainProphet:
 
     def convert_date_feature_column_for_prophet(self):
         renaming = {self.date: 'ds', self.feature: 'y'}
-        return self.f_w_data.rename(columns=renaming)
+        self.f_w_data = self.f_w_data.rename(columns=renaming)
+        self.f_w_data['ds'] = self.f_w_data['ds'].dt.tz_convert(None)
+        return self.f_w_data
 
     def fit_predict_model(self, save_model=True):
         self.f_w_data = self.convert_date_feature_column_for_prophet()
         self.model = Prophet(daily_seasonality=False, yearly_seasonality=False, weekly_seasonality=False,
                              seasonality_mode='multiplicative',
-                             interval_width=self.params['interval_width'],
-                             changepoint_range=self.params['changepoint_range'],
-                             n_changepoints=self.params['n_changepoints']
+                             interval_width=float(self.params['interval_width']),
+                             changepoint_range=float(self.params['changepoint_range']),
+                             n_changepoints=int(self.params['n_changepoints'])
                              ).fit(self.f_w_data[['ds', 'y']])
         if save_model:
             model_from_to_pkl(directory=conf('model_main_path'),
@@ -185,7 +187,7 @@ class TrainProphet:
         config['hyper_parameters']['prophet'] = self.optimized_parameters
         config['has_param_tuning_first_run']['prophet'] = True
         write_yaml(conf('docs_main_path'), "configs.yaml", config)
-
+        self.params = conf('parameter_3')
 
 
 
