@@ -117,7 +117,7 @@ def web_service_run():
             print(e)
         return "Done"
 
-    @app.route("/dash")
+    @app.route("/dash/")
     def my_dash_app():
         return dashboard.index()
 
@@ -127,7 +127,7 @@ def web_service_run():
         connection = check_available_data_for_dashboard(jobs)
         return render_template('dashboard.html',
                                connection=connection,
-                               dash_url="http://127.0.0.1:" + str(conf('config')['web_port']) + "/dash")
+                               dash_url="http://127.0.0.1:" + str(conf('config')['web_port']) + "/dash/")
 
     @app.route('/shutdown', methods=['POST'])
     def shutdown():
