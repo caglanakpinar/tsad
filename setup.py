@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="anomaly_detection_framework",
-    version="0.0.12",
+    version="0.0.14",
     author="Caglan Akpinar",
     author_email="cakpinar23@gmail.com",
     description="Anomaly Detection Framework allows us to calculate Anomalities on any Time - Series Data Sets. It has an interface which is easy to manage to train - predict with given dataset.",

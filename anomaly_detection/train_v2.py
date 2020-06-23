@@ -269,6 +269,6 @@ class TrainLSTM:
         config['hyper_parameters']['lstm'] = self.optimized_parameters
         config['has_param_tuning_first_run']['lstm'] = True
         write_yaml(conf('docs_main_path'), "configs.yaml", config)
-
+        self.params = conf('parameters')
 
 
