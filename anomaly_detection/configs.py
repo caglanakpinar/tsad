@@ -15,7 +15,6 @@ def get_directory(path):
     for ins in instances['instances']:
         if ins['active'] is True and init_directory2 == ins['absolute_path']:
             active_ins.append(ins)
-
     if len(active_ins) == 0:
         directory = init_directory
         web = 7070
@@ -25,7 +24,7 @@ def get_directory(path):
         web = active['web']
     if len(active_ins) > 1:
         now = datetime.datetime.now()
-        actives = list(map(lambda x: ((now - parse(x['date'])).total_seconds(), x['directory'], 'web'), active_ins))
+        actives = list(map(lambda x: ((now - x['start_date']).total_seconds(), x['directory'], x['web']), active_ins))
         directory = sorted(actives)[0][1]
         web = sorted(actives)[0][2]
 

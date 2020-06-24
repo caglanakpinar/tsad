@@ -199,7 +199,7 @@ class Configurations:
             available_ports = conf('available_ports')
             while len(self.ports) != service_count:
                 if not is_port_in_use(available_ports[count]):
-                    self.ports.append(available_ports[count])
+                    self.ports.append(int(available_ports[count]))
                 count += 1
 
     def check_for_host(self, api_name, count):
