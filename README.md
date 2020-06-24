@@ -71,7 +71,7 @@ Anomaly-Detection-Framework enables to Data Science communities easy to detect a
 
 
 ```
-import anomaly_detection as ad_exec
+from anomaly_detection import ad_execute as ad_exec
 
 ad = ad_exec.AnomalyDetection(path='./Desktop', environment='local)
 ad.init(apis=None)
