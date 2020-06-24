@@ -542,7 +542,7 @@ class AnomalyDetection:
         time_indicator = self.jobs['prediction']['execute'][0]['params']['time_indicator']
         feature = self.jobs['prediction']['execute'][0]['params']['feature']
         results = get_results(time_indicator)
-        if dates is not None
+        if dates is not None:
             results = results[results[time_indicator] >= parse(dates[0]) & results[time_indicator] <= parse(dates[1])]
         show_chart(results, time_indicator, 'predict', feature, is_bar_chart=False)
         print("")
