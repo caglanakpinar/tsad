@@ -22,19 +22,21 @@ def get_directory(path):
         active = active_ins[0]
         directory = active['directory']
         web = active['web']
+        web_host = active['web_host']
     if len(active_ins) > 1:
         now = datetime.datetime.now()
-        actives = list(map(lambda x: ((now - x['start_date']).total_seconds(), x['directory'], x['web']), active_ins))
+        actives = list(map(lambda x: ((now - x['start_date']).total_seconds(), x['directory'], x['web'], x['web_host']), active_ins))
         directory = sorted(actives)[0][1]
         web = sorted(actives)[0][2]
+        web_host = sorted(actives)[0][3]
 
     with open(join(directory, "docs", "configs.yaml")) as file:
         config = yaml.full_load(file)
-    return config, directory, web
+    return config, directory, web, web_host
 
 
 def conf(var):
-    config, directory, web = get_directory(init_directory)
+    config, directory, web, web_host = get_directory(init_directory)
     return {
              'data_main_path': join(directory, "", config['data_main_path']),
              'model_main_path': join(directory, "", config['model_main_path']),
@@ -52,6 +54,7 @@ def conf(var):
              'has_param_tuning_first_run': config['has_param_tuning_first_run'],
              'directory': directory,
              'web_port': web,
+             'web_host': web_host,
              'config': {c: config[c] for c in config
                         if c not in
                         ['data_main_path', 'model_main_path', 'log_main_path', 'docs_main_path', 'folder_name']}
