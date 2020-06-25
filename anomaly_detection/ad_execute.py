@@ -193,7 +193,10 @@ class Configurations:
         :param service_count: number of service which cpecifically assigned for this configuration.
                               By defaults finds available port for each services.
         """
-        from .configs import conf
+        try:
+            from configs import conf
+        except Exception as e:
+            from .configs import conf
         if self.cd.check_for_directory():
             count = 0
             available_ports = conf('available_ports')
@@ -203,7 +206,6 @@ class Configurations:
                 count += 1
 
     def check_for_host(self, api_name, count):
-
         if self.cd.check_for_directory():
             if type(self.host) == 'list':
                 return self.host[count]
@@ -211,6 +213,14 @@ class Configurations:
                 return self.host[api_name]
             elif type(self.host) != 'list' and type(self.host) != 'set':
                 return self.host
+
+    def check_for_api(self, apis, api_name, var):
+        acception = True
+        if apis is not None:
+            if api_name in list(apis.keys()):
+                if var in list(apis[api_name].keys()):
+                    acception = False
+        return acception
 
     def create_docker_compose_file(self):
         if self.cd.check_for_directory():
@@ -239,12 +249,15 @@ class Configurations:
             return  True
 
     def update_api_file(self, apis=None):
-        from .configs import conf
+        try:
+            from configs import conf
+        except Exception as e:
+            from .configs import conf
         self.api_file = read_yaml(conf('docs_main_path'), "apis.yaml")
         if apis is not None:
             if not self.master_node:
                 self.api_file = {a: self.api_file[a] for a in apis}
-            if type(apis) == 'dict':
+            if type(apis) == dict:
                 for a in apis:
                     for p in apis[a]:
                         self.api_file[a][p] = apis[a][p]
@@ -256,17 +269,25 @@ class Configurations:
             self.api_file = {a: self.api_file[a] for a in list(self.api_file.keys()) if a != 'ml_execute'}
         write_yaml(join(self.folder, "docs"), "apis.yaml", self.api_file)
 
-    def create_api_file(self, environment):
+    def create_api_file(self, environment, apis=None):
         if self.cd.check_for_directory():
             self.check_for_ports(service_count=len(self.api_file))
             count = 0
             for s in self.api_file:
-                print("available port for service :", s, " - ", str(self.ports[count]))
-                self.api_file[s]['port'] = self.ports[count]
-                self.api_file[s]['host_create'] = '127.0.0.1' if self.host != 'docker' else '0.0.0.0'
-                self.api_file[s]['host'] = '127.0.0.1' if self.host != 'docker' else '0.0.0.0'
-                if self.host != 'local' and environment != 'docker':
-                    self.api_file[s]['host'] = self.check_for_host(s, count)
+                if self.check_for_api(apis, s, 'port'):
+                    self.api_file[s]['port'] = self.ports[count]
+                    print("available port for service :", s, " - ", str(self.ports[count]))
+                else:
+                    print("available port for service :", s, " - ", str(self.api_file[s]['port']))
+
+                if self.check_for_api(apis, s, 'host'):
+                    self.api_file[s]['host_create'] = '127.0.0.1' if self.host != 'docker' else '0.0.0.0'
+                    self.api_file[s]['host'] = '127.0.0.1' if self.host != 'docker' else '0.0.0.0'
+
+                if self.check_for_api(apis, s, 'port'):
+                    if self.host != 'local' and environment != 'docker':
+                        self.api_file[s]['host'] = self.check_for_host(s, count)
+
                 count += 1
             self.update_api_yaml_file()
 
@@ -309,7 +330,10 @@ class BuildPlatform:
             self.docker_env()
 
     def down_web(self):
-        from configs import conf
+        try:
+            from configs import conf
+        except Exception as e:
+            from .configs import conf
         request_url(url='http://0.0.0.0:' + str(conf('web_port')) + '/shutdown')
 
 
@@ -378,7 +402,7 @@ class AnomalyDetection:
             if self.env == 'docker':
                 self.conf.create_docker_compose_file()
             self.conf.update_api_file(apis=apis)
-            self.conf.create_api_file(environment=self.env)
+            self.conf.create_api_file(environment=self.env, apis=apis)
             print("Configuration process is completed!!!")
             print("platform is initialized!!!")
         else:
@@ -388,7 +412,10 @@ class AnomalyDetection:
         self.platform = BuildPlatform(conf=self.conf, environment=self.env, master_node=self.conf.master_node)
         self.platform.initialize()
         if self.conf.master_node:
-            from configs import conf
+            try:
+                from configs import conf
+            except Exception as e:
+                from .configs import conf
             self.web_port = conf('web_port')
             print("platform is up!!!")
             print("*"*5, " WEB APPLICATION ", "*"*5)
@@ -527,7 +554,10 @@ class AnomalyDetection:
         :return:
         """
         if self.jobs is None:
-            from configs import conf
+            try:
+                from configs import conf
+            except Exception as e:
+                from .configs import conf
             self.jobs = read_yaml(conf('docs_main_path'), "ml_execute.yaml")
         time_indicator = self.jobs['prediction']['execute'][0]['params']['time_indicator']
         feature = self.jobs['prediction']['execute'][0]['params']['feature']
@@ -537,7 +567,10 @@ class AnomalyDetection:
 
     def show_anomaly_detection(self, dates=None):
         if self.jobs is None:
-            from configs import conf
+            try:
+                from configs import conf
+            except Exception as e:
+                from .configs import conf
             self.jobs = read_yaml(conf('docs_main_path'), "ml_execute.yaml")
         time_indicator = self.jobs['prediction']['execute'][0]['params']['time_indicator']
         feature = self.jobs['prediction']['execute'][0]['params']['feature']
