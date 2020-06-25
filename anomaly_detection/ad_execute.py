@@ -126,6 +126,7 @@ class CreateDirectory:
                 instances['instances'] += [{'directory': self.folder,
                                             'absolute_path': abspath(""),
                                             'web': find_web_port(),
+                                            'web_host': '127.0.0.1' if env == 'local' else env,
                                             'id': str(random.random()).replace(".", ""),
                                             'active': True,
                                             'start_date': datetime.now()}]
@@ -334,7 +335,7 @@ class BuildPlatform:
             from configs import conf
         except Exception as e:
             from .configs import conf
-        request_url(url='http://0.0.0.0:' + str(conf('web_port')) + '/shutdown')
+        request_url(url='http://' + conf('web_host') + ':' + str(conf('web_port')) + '/shutdown')
 
 
     def down(self):
@@ -395,8 +396,10 @@ class AnomalyDetection:
         self.web_port = None
         self.info_dict = {}
         self.jobs = None
+        self.apis = None
 
     def init(self, apis=None):
+        self.apis = None
         if self.conf.check_for_api_and_host(apis=apis):
             self.conf.create_directory()
             if self.env == 'docker':
@@ -417,9 +420,10 @@ class AnomalyDetection:
             except Exception as e:
                 from .configs import conf
             self.web_port = conf('web_port')
+            self.web_host = conf('web_host')
             print("platform is up!!!")
             print("*"*5, " WEB APPLICATION ", "*"*5)
-            print('Running on ', 'http://0.0.0.0:' + str(self.web_port) + '/')
+            print('Running on ', 'http://' + self.web_host + ':' + str(self.web_port) + '/')
         else:
             print("platform is up!!!")
             print("Running Services:")

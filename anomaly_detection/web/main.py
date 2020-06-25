@@ -127,7 +127,7 @@ def web_service_run():
         connection = check_available_data_for_dashboard(jobs)
         return render_template('dashboard.html',
                                connection=connection,
-                               dash_url="http://127.0.0.1:" + str(conf('config')['web_port']) + "/dash/")
+                               dash_url="http://" + conf('web_host') + ":" + str(conf('config')['web_port']) + "/dash/")
 
     @app.route('/shutdown', methods=['POST'])
     def shutdown():
@@ -136,7 +136,7 @@ def web_service_run():
             raise RuntimeError('Not running with the Werkzeug Server')
         func()
         return 'Server shutting down...'
-    app.run(threaded=False, port=int(conf('web_port')), debug=False, host='127.0.0.1')
+    app.run(threaded=False, port=int(conf('web_port')), debug=False, host=conf('web_host'))
 
 
 if __name__ == '__main__':
