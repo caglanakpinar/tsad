@@ -398,7 +398,7 @@ class AnomalyDetection:
         self.jobs = None
         self.apis = None
 
-    def init(self, apis=None):
+    def init(self, apis={}):
         self.apis = None
         if self.conf.check_for_api_and_host(apis=apis):
             self.conf.create_directory()
