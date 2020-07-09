@@ -15,7 +15,7 @@ Anomaly-Detection-Framework enables to Data Science communities easy to detect a
     It is a web interface which allows us to connect data source and execute Machine Learning processes. You may create tasks according to your data set. These tasks are train models, Anomaly Detection Prediction, Parameter Tunning For Train Models.
     - *Menu*
         - [Data Source Configuraitons](http://127.0.0.1:7002/configs)
-        - [Crate Task](http://127.0.0.1:7002/configs)
+        - [Create Task](http://127.0.0.1:7002/configs)
         - [Job Center](http://127.0.0.1:7002/ml_execute)
         - [Dashboard](http//:127.0.0.1:7002/dashboard)
     
