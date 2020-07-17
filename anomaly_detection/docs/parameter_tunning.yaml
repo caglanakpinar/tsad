@@ -1,0 +1,49 @@
+hyper_parameters:
+  iso_f:
+    contamination: 0.01
+    num_of_trees: 1000
+    split_ratio: 0.8
+  lstm:
+    activation: relu
+    batch_count: 8
+    batch_size: 16
+    epochs: 10
+    l1: 0.01
+    l2: 0.01
+    lag: 2
+    lahead: 2
+    lr: 0.04
+    split_ratio: 0.8
+    tsteps: 2
+    units: 8
+  prophet:
+    contamination: 0.30000000000000004
+    interval_width: 0.95
+    num_of_trees: 200
+    split_ratio: 0.8
+    changepoint_range: 0.1
+    n_changepoints: 50
+parameter_tuning:
+  iso_f:
+    contamination: 0.1*0.5
+    num_of_trees: 200*1200
+  lstm:
+    batch_size: 8*24
+    epochs: 5*20
+    lag: 2*4
+    lahead: 2*4
+    lr: 0.01*0.05
+    tsteps: 2*4
+    units: 4*12
+  prophet:
+    changepoint_range: 0.1*0.5
+    interval_width: 0.9*0.95
+    n_changepoints: 50*300
+has_param_tuning_first_run:
+  lstm: false
+  prophet: false
+  iso_f: false
+combination_params:
+  iso_f:
+  lstm:
+  prophet:

@@ -241,7 +241,7 @@ class Configurations:
             write_yaml(self.folder, "docker-compose.yml", self.compose_file)
 
     def check_for_api_and_host(self, apis=None):
-        if apis is None and self.host not in ['docker', 'local']:
+        if apis is not None and self.host not in ['docker', 'local']:
             if len(apis) == len(self.host):
                 return True
             else:

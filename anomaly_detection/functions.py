@@ -5,7 +5,7 @@ from scipy import stats
 from itertools import product, combinations
 
 from data_access import GetData
-from configs import conf, time_dimensions, alpha, day_of_year, time_indicator_accept_threshold, s_size_ratio
+from configs import conf, time_dimensions, alpha, day_of_year, time_indicator_accept_threshold, s_size_ratio, hyper_conf
 from utils import *
 
 
