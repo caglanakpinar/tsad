@@ -44,7 +44,7 @@ parameter_tuning:
     model: train
   time_zone_diffs: 0
 prediction:
-  active: true
+  active: false
   api: ml
   browser_time: null
   day: null

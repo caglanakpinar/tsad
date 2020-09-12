@@ -241,7 +241,7 @@ class Configurations:
             write_yaml(self.folder, "docker-compose.yml", self.compose_file)
 
     def check_for_api_and_host(self, apis=None):
-        if apis is None and self.host not in ['docker', 'local']:
+        if apis is not None and self.host not in ['docker', 'local']:
             if len(apis) == len(self.host):
                 return True
             else:
@@ -526,11 +526,13 @@ class AnomalyDetection:
                     print({'train': self.get_ml_dictionary({}), 'prediction': self.get_ml_dictionary({})})
                     print("*** "*5)
                     print("Rules of Creating Job / Jobs :")
-                    print("**1. 'time_indicator', 'feature', 'days' are monditory fields.")
-                    print("**2. Jobs are 'train', 'prediction', 'paramter_tuning'.")
-                    print("**3. If you don`t assign any date to train it will directly start assignin as 2 min after the current time.")
-                    print("**4. Prediction 'date' is monditory.")
-                    print("**5. If you don`t assign any date to paramter_tuning it will directly start assignin as 1 day after the  train job date.")
+                    print("**1. 'time_indicator', 'feature', 'days' are manditory fields.")
+                    print("**2. Jobs are 'train', 'prediction', 'parameter_tuning'.")
+                    print("**3. If you don`t assign any date to train \n"
+                          "it will directly start assigning as 2 min after the current time.")
+                    print("**4. Prediction 'date' is manditory.")
+                    print("**5. If you don`t assign any date to paramter_tuning \n"
+                          "it will directly start assigning as 1 day after the  train job date.")
         else:
             self.platform.create_job(job=list(jobs.keys())[0], **self.get_ml_dictionary(job=jobs[list(jobs.keys())[0]]))
         print("job is created")

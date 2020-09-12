@@ -30,13 +30,24 @@ def get_directory(path):
         web = sorted(actives)[0][2]
         web_host = sorted(actives)[0][3]
 
+    return directory, web, web_host
+
+
+def read_config(directory):
     with open(join(directory, "docs", "configs.yaml")) as file:
         config = yaml.full_load(file)
-    return config, directory, web, web_host
+    return config
+
+
+def read_params(directory):
+    with open(join(directory, "docs", "parameter_tunning.yaml")) as file:
+        config = yaml.full_load(file)
+    return config
 
 
 def conf(var):
-    config, directory, web, web_host = get_directory(init_directory)
+    directory, web, web_host = get_directory(init_directory)
+    config = read_config(directory)
     return {
              'data_main_path': join(directory, "", config['data_main_path']),
              'model_main_path': join(directory, "", config['model_main_path']),
@@ -59,6 +70,25 @@ def conf(var):
                         if c not in
                         ['data_main_path', 'model_main_path', 'log_main_path', 'docs_main_path', 'folder_name']}
     }[var]
+
+
+def hyper_conf(var):
+    directory, web, web_host = get_directory(init_directory)
+    config = read_params(directory)
+    return {
+            'lstm': config['hyper_parameters']['lstm'],
+            'prophet': config['hyper_parameters']['prophet'],
+            'iso_f': config['hyper_parameters']['iso_f'],
+            'lstm_pt': config['parameter_tuning']['lstm'],
+            'prophet_pt': config['parameter_tuning']['prophet'],
+            'iso_f_pt': config['parameter_tuning']['iso_f'],
+            'lstm_cp': config['combination_params']['lstm'],
+            'prophet_cp': config['combination_params']['prophet'],
+            'iso_f_cp': config['combination_params']['iso_f'],
+            'lstm_has_param_tuning_first_run': config['has_param_tuning_first_run']['lstm'],
+            'prophet_has_param_tuning_first_run': config['has_param_tuning_first_run']['prophet'],
+            'iso_f_has_param_tuning_first_run': config['has_param_tuning_first_run']['iso_f']}[var]
+
 
 
 

@@ -4,6 +4,8 @@ import random
 import numpy as np
 from itertools import product
 import pandas as pd
+import threading
+from multiprocessing import cpu_count
 
 from functions import *
 from utils import *
@@ -63,7 +65,12 @@ class TrainProphet:
                  job=None, groups=None, time_indicator=None, feature=None,
                  data_source=None, data_query_path=None, time_period=None):
         self.job = job
-        self.params = conf('parameter_3')
+        self.params = hyper_conf('prophet')
+        self.combination_params = hyper_conf('prophet_cp')
+        self.hyper_params = hyper_conf('prophet_pt')
+        self.optimized_parameters = {}
+        self._p = None
+        self.levels_tuning = get_tuning_params(self.hyper_params, self.params, self.job)
         self.query_date = get_query_date(job, period=time_period, dates=None, params=self.params)
         self.data, self.groups = data_manipulation(job=job,
                                                    date=self.query_date,
@@ -74,15 +81,12 @@ class TrainProphet:
                                                    data_query_path=data_query_path)
         self.date = time_indicator
         self.f_w_data = self.data
-        self.optimized_parameters = self.params
-        self.hyper_params = conf('parameter_tuning')['prophet']
         self.split_date = get_split_date(period=time_period, dates=list(self.data[self.date]), params=self.params)
         self.feature = feature
         self.anomaly = []
         self.model = None
         self.count = 1
         self.levels = get_levels(self.data, self.groups)
-        self.levels_tuning = get_tuning_params(self.hyper_params, self.params, self.job)
         self.logger = LoggerProcess(job=job,
                                     model='prophet',
                                     total_process=len(self.levels)
@@ -102,19 +106,22 @@ class TrainProphet:
         query = query[:-4]
         return query
 
+    def get_related_params(self):
+        self._p = self.params if self.combination_params is None else self.combination_params[self.get_param_key()]
+
     def convert_date_feature_column_for_prophet(self):
         renaming = {self.date: 'ds', self.feature: 'y'}
         self.f_w_data = self.f_w_data.rename(columns=renaming)
-        self.f_w_data['ds'] = self.f_w_data['ds'].dt.tz_convert(None)
+        self.f_w_data['ds'] = self.f_w_data['ds'].apply(lambda x: datetime.datetime.strptime(str(x)[0:19], '%Y-%m-%d %H:%M:%S'))
         return self.f_w_data
 
     def fit_predict_model(self, save_model=True):
         self.f_w_data = self.convert_date_feature_column_for_prophet()
         self.model = Prophet(daily_seasonality=False, yearly_seasonality=False, weekly_seasonality=False,
                              seasonality_mode='multiplicative',
-                             interval_width=float(self.params['interval_width']),
-                             changepoint_range=float(self.params['changepoint_range']),
-                             n_changepoints=int(self.params['n_changepoints'])
+                             interval_width=float(self._p['interval_width']),
+                             changepoint_range=float(self._p['changepoint_range']),
+                             n_changepoints=int(self._p['n_changepoints'])
                              ).fit(self.f_w_data[['ds', 'y']])
         if save_model:
             model_from_to_pkl(directory=conf('model_main_path'),
@@ -125,6 +132,7 @@ class TrainProphet:
         self.model = model_from_to_pkl(directory=conf('model_main_path'),
                                        path=model_path(self.comb, self.groups, 'prophet'))
         try:
+
             self.prediction = self.model.predict(self.convert_date_feature_column_for_prophet())
             self.f_w_data = pd.merge(self.f_w_data,
                                      self.prediction.rename(columns={'ds': self.date}),
@@ -141,13 +149,14 @@ class TrainProphet:
             print(e)
 
     def train_execute(self):
-        if not conf('has_param_tuning_first_run')['prophet']:
+        if not hyper_conf('prophet_has_param_tuning_first_run'):
             self.parameter_tuning()
         for self.comb in self.levels:
             print("*" * 4, "PROPHET - ", self.get_query().replace(" and ", "; ").replace(" == ", " - "), "*" * 4)
             self.f_w_data = self.data.query(self.get_query()).sort_values(by=self.date)
             print("data size :", len(self.f_w_data))
             self.convert_date_feature_column_for_prophet()
+            self.get_related_params()
             self.fit_predict_model()
             self.logger.counter()
             if not check_request_stoped(self.job):
@@ -165,29 +174,56 @@ class TrainProphet:
                 break
         self.anomaly = DataFrame(self.anomaly)
 
+    def process_execute(self, pr, count):
+        self.get_related_params()
+        self._p = get_params(self._p, pr)
+        print("hyper parameters : ", self._p)
+        self.convert_date_feature_column_for_prophet()
+        self.fit_predict_model(save_model=False)
+        self.prediction = self.model.predict(self.convert_date_feature_column_for_prophet())
+        error[count] = mean_absolute_percentage_error(self.f_w_data['y'], abs(self.prediction['yhat']))
+
+    def parameter_tuning_threading(self, has_comb=True):
+        global error
+        error = {}
+        _optimized_parameters = None
+        err = 100000000
+        self.f_w_data = self.data.query(self.get_query()).sort_values(by=self.date) if has_comb else self.f_w_data
+        self.f_w_data = self.f_w_data[-int(0.1 * len(self.f_w_data)):]
+        for iter in range(int(len(self.levels_tuning) / cpu_count())):
+            _levels = self.levels_tuning[(iter * cpu_count()):((iter + 1) * cpu_count())]
+            for i in range(len(_levels)):
+                self.logger.counter()
+                process = threading.Thread(target=self.process_execute, daemon=True, args=(_levels[i], i, ))
+                process.start()
+            process.join()
+            for i in error:
+                if i in list(error.keys()):
+                    if error[i] < err:
+                        err = error[i]
+                        _optimized_parameters = get_params(self.params, _levels[i])
+        return _optimized_parameters
+
+    def get_param_key(self):
+        return "_".join([str(i[0]) + "*" + str(i[1]) for i in zip(self.groups, self.comb)])
+
     def parameter_tuning(self):
-        error = 1000000
-        self.f_w_data = self.data.pivot_table(index=self.date,
-                                              aggfunc={self.feature: 'mean'}
-                                              ).reset_index().sort_values(by=self.date, ascending=True)
-        for pr in self.levels_tuning:
-            self.params = get_params(self.params, pr)
-            print("hyper parameters : ", self.params)
-            self.convert_date_feature_column_for_prophet()
-            self.fit_predict_model(save_model=False)
-            self.prediction = self.model.predict(self.convert_date_feature_column_for_prophet())
-            if mean_absolute_percentage_error(self.f_w_data['y'], abs(self.prediction['yhat'])) < error:
-                error = mean_absolute_percentage_error(self.f_w_data['y'], abs(self.prediction['yhat']))
-                self.optimized_parameters = self.params
-            self.logger.counter()
-            if not check_request_stoped(self.job):
-                break
+        if len(self.levels) == 0:
+            self.optimized_parameters = self.parameter_tuning_threading(has_comb=False)
+        else:
+            for self.comb in self.levels:
+                self.optimized_parameters[self.get_param_key()] = self.parameter_tuning_threading()
+                if not check_request_stoped(self.job):
+                    break
         print("updating model parameters")
-        config = read_yaml(conf('docs_main_path'), 'configs.yaml')
-        config['hyper_parameters']['prophet'] = self.optimized_parameters
-        config['has_param_tuning_first_run']['prophet'] = True
-        write_yaml(conf('docs_main_path'), "configs.yaml", config)
-        self.params = conf('parameter_3')
+        pt_config = read_yaml(conf('docs_main_path'), 'parameter_tunning.yaml')
+        pt_config['has_param_tuning_first_run']['prophet'] = True
+        _key = 'hyper_parameters' if len(self.levels) == 0 else 'combination_params'
+        pt_config[_key]['prophet'] = self.optimized_parameters
+        write_yaml(conf('docs_main_path'), "parameter_tunning.yaml", pt_config, ignoring_aliases=True)
+        self.params = hyper_conf('prophet')
+        self.combination_params = hyper_conf('prophet_cp')
+
 
 
 
