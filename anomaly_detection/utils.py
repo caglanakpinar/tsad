@@ -83,14 +83,13 @@ def read_yaml(directory, filename):
 
 def write_yaml(directory, filename, data, ignoring_aliases=False):
     if ignoring_aliases:
-        yaml.Dumper.ignore_aliases = lambda *args : True
+        yaml.Dumper.ignore_aliases = lambda *args: True
 
     with open(join(directory, "", filename), 'w') as file:
         if ignoring_aliases:
             yaml.dump(data, file, default_flow_style=False)
         else:
             yaml.dump(data, file)
-
 
 
 def read_write_to_json(directory, filename, data, is_writing):

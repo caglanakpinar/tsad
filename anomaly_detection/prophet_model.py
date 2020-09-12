@@ -132,6 +132,7 @@ class TrainProphet:
         self.model = model_from_to_pkl(directory=conf('model_main_path'),
                                        path=model_path(self.comb, self.groups, 'prophet'))
         try:
+
             self.prediction = self.model.predict(self.convert_date_feature_column_for_prophet())
             self.f_w_data = pd.merge(self.f_w_data,
                                      self.prediction.rename(columns={'ds': self.date}),
@@ -186,22 +187,21 @@ class TrainProphet:
         global error
         error = {}
         _optimized_parameters = None
+        err = 100000000
         self.f_w_data = self.data.query(self.get_query()).sort_values(by=self.date) if has_comb else self.f_w_data
         self.f_w_data = self.f_w_data[-int(0.1 * len(self.f_w_data)):]
-        err = 100000000
         for iter in range(int(len(self.levels_tuning) / cpu_count())):
             _levels = self.levels_tuning[(iter * cpu_count()):((iter + 1) * cpu_count())]
             for i in range(len(_levels)):
+                self.logger.counter()
                 process = threading.Thread(target=self.process_execute, daemon=True, args=(_levels[i], i, ))
                 process.start()
             process.join()
-            print(error)
             for i in error:
                 if i in list(error.keys()):
                     if error[i] < err:
                         err = error[i]
                         _optimized_parameters = get_params(self.params, _levels[i])
-                self.logger.counter()
         return _optimized_parameters
 
     def get_param_key(self):
@@ -213,12 +213,14 @@ class TrainProphet:
         else:
             for self.comb in self.levels:
                 self.optimized_parameters[self.get_param_key()] = self.parameter_tuning_threading()
+                if not check_request_stoped(self.job):
+                    break
         print("updating model parameters")
         pt_config = read_yaml(conf('docs_main_path'), 'parameter_tunning.yaml')
         pt_config['has_param_tuning_first_run']['prophet'] = True
         _key = 'hyper_parameters' if len(self.levels) == 0 else 'combination_params'
         pt_config[_key]['prophet'] = self.optimized_parameters
-        write_yaml(conf('docs_main_path'), "parameter_tunning.yaml", pt_config)
+        write_yaml(conf('docs_main_path'), "parameter_tunning.yaml", pt_config, ignoring_aliases=True)
         self.params = hyper_conf('prophet')
         self.combination_params = hyper_conf('prophet_cp')
 

@@ -11,9 +11,11 @@ from tensorflow.keras.initializers import Ones
 from tensorflow.keras.models import model_from_json
 import numpy as np
 from itertools import product
+import threading
+from multiprocessing import cpu_count
 
 from functions import *
-from configs import conf, boostrap_ratio, iteration
+from configs import conf, boostrap_ratio, iteration, hyper_conf
 from data_access import *
 from logger import LoggerProcess
 
@@ -79,7 +81,11 @@ class TrainLSTM:
                  job=None, groups=None, time_indicator=None, feature=None,
                  data_source=None, data_query_path=None, time_period=None):
         self.job = job
-        self.params = conf('parameters')
+        self.params = hyper_conf('lstm')
+        self.combination_params = hyper_conf('lstm_cp')
+        self.hyper_params = hyper_conf('lstm_pt')
+        self.optimized_parameters = {}
+        self._p = None
         self.query_date = get_query_date(job, params=self.params)
         self.data, self.groups = data_manipulation(job=job,
                                                    date=self.query_date,
@@ -93,8 +99,6 @@ class TrainLSTM:
         self.split_date = get_split_date(period=None,
                                          dates=list(self.data[self.date]),
                                          params=self.params)
-        self.hyper_params = conf('parameter_tuning')['lstm']
-        self.optimized_parameters = self.params
         self.data_count = 0
         self.feature, self.feature_norm = feature, feature + '_norm'
         self.scale = None
@@ -126,6 +130,9 @@ class TrainLSTM:
         query = query[:-4]
         return query
 
+    def get_related_params(self):
+        self._p = hyper_conf('lstm') if self.combination_params is None else self.combination_params[self.get_param_key()]
+
     def normalization(self):
         self.f_w_data[self.feature_norm] = self.f_w_data[self.feature]
         if not self.is_normalized_feature:
@@ -134,18 +141,17 @@ class TrainLSTM:
 
     def split_data(self):
         self.result = self.f_w_data[self.f_w_data[
-                                        self.date] >= (self.split_date - calculate_intersect_days(self.params))]
+                                        self.date] >= (self.split_date - calculate_intersect_days(self._p))]
 
     def batch_size(self):
-        self.params = conf('parameters')
-        self.data_count = len(drop_calculation(self.f_w_data, self.params, is_prediction=True))
-        self.params = calculate_batch_count(self.data_count, self.params)
+        self.data_count = len(drop_calculation(self.f_w_data, self._p, is_prediction=True))
+        self._p = calculate_batch_count(self.data_count, self._p)
 
     def data_preparation(self, is_prediction):
         if not is_prediction:
-            self.train = data_preparation(self.f_w_data, [self.feature_norm], self.params, is_prediction=False)
+            self.train = data_preparation(self.f_w_data, [self.feature_norm], self._p, is_prediction=False)
         else:
-            self.prediction = data_preparation(self.result, [self.feature_norm], self.params, is_prediction=True)
+            self.prediction = data_preparation(self.result, [self.feature_norm], self._p, is_prediction=True)
 
     def init_tensorflow(self):
         self.count += 1
@@ -159,23 +165,23 @@ class TrainLSTM:
     def create_model(self):
         self.init_tensorflow()
         self.input = Input(shape=(self.train['x_train'].shape[1], 1))
-        self.lstm = LSTM(self.params['units'],
-                         batch_size=self.params['batch_size'],
+        self.lstm = LSTM(self._p['units'],
+                         batch_size=self._p['batch_size'],
                          recurrent_initializer=Ones(),
                          kernel_initializer=Ones(),
                          use_bias=False,
-                         recurrent_activation=self.params['activation'],
+                         recurrent_activation=self._p['activation'],
                          dropout=0.25
                          )(self.input)
         self.lstm = Dense(1)(self.lstm)
         self.model = Model(inputs=self.input, outputs=self.lstm)
-        self.model.compile(loss='mae', optimizer=RMSprop(lr=self.params['lr']), metrics=['mae'])
+        self.model.compile(loss='mae', optimizer=RMSprop(lr=self._p['lr']), metrics=['mae'])
 
     def learning_process(self, save_model=True):
         self.model.fit(self.train['x_train'],
                        self.train['y_train'],
-                       batch_size=self.params['batch_size'],
-                       epochs=self.params['epochs'],
+                       batch_size=self._p['batch_size'],
+                       epochs=self._p['epochs'],
                        verbose=0,
                        validation_data=(self.train['x_test'], self.train['y_test']),
                        shuffle=False)
@@ -217,13 +223,14 @@ class TrainLSTM:
         print(self.result[['anomaly_score_1', 'ad_label_1', 'predict'] + self.groups].head())
 
     def train_execute(self):
-        if not conf('has_param_tuning_first_run')['lstm']:
+        if not hyper_conf('lstm_has_param_tuning_first_run'):
             self.parameter_tuning()
         for self.comb in self.levels:
             print("*" * 4, "LSTM - ", self.get_query().replace(" and ", "; ").replace(" == ", " - "), "*" * 4)
             self.f_w_data = self.data.query(self.get_query()).sort_values(by=self.date)
+            self.get_related_params()
             try:
-                if len(self.f_w_data) > self.params['batch_size'] * 2:
+                if len(self.f_w_data) > self._p['batch_size'] * 2:
                     self.normalization()
                     self.batch_size()
                     self.data_preparation(is_prediction=False)
@@ -253,32 +260,58 @@ class TrainLSTM:
             if not check_request_stoped(self.job):
                 break
         self.anomaly = DataFrame(self.anomaly)
-        print()
+
+    def process_execute(self, pr, count):
+        self.get_related_params()
+        self._p = get_params(self._p, pr)
+        print("hyper parameters : ", self._p)
+        self.normalization()
+        self.batch_size()
+        self.data_preparation(is_prediction=False)
+        self.create_model()
+        self.learning_process(save_model=False)
+        error[count] = np.mean(self.model.history.history['loss'])
+
+    def parameter_tuning_threading(self, has_comb=True):
+        global error
+        error = {}
+        _optimized_parameters = None
+        err = 100000000
+        self.f_w_data = self.data.query(self.get_query()).sort_values(by=self.date) if has_comb else self.f_w_data
+        for iter in range(int(len(self.levels_tuning) / cpu_count())):
+            _levels = self.levels_tuning[(iter * cpu_count()):((iter + 1) * cpu_count())]
+            for i in range(len(_levels)):
+                self.logger.counter()
+                process = threading.Thread(target=self.process_execute, daemon=True, args=(_levels[i], i, ))
+                process.start()
+            process.join()
+            for i in error:
+                if i in list(error.keys()):
+                    if error[i] < err:
+                        err = error[i]
+                        _optimized_parameters = get_params(self.params, _levels[i])
+                        _optimized_parameters['batch_count'] = self.params['batch_count']
+        return _optimized_parameters
+
+    def get_param_key(self):
+        return "_".join([str(i[0]) + "*" + str(i[1]) for i in zip(self.groups, self.comb)])
 
     def parameter_tuning(self):
-        error = 1000000
-        self.f_w_data = self.data.pivot_table(index=self.date,
-                                              aggfunc={self.feature: 'mean'}
-                                              ).reset_index().sort_values(by=self.date, ascending=True)
-        for pr in self.levels_tuning:
-            self.params = get_params(self.params, pr)
-            self.normalization()
-            self.batch_size()
-            self.data_preparation(is_prediction=False)
-            self.create_model()
-            self.learning_process(save_model=False)
-            print("mean absolute error :", np.mean(self.model.history.history['loss']))
-            if np.mean(self.model.history.history['loss']) < error:
-                error = np.mean(self.model.history.history['loss'])
-                self.optimized_parameters = self.params
-            self.logger.counter()
-            if not check_request_stoped(self.job):
-                break
+        if len(self.levels) == 0:
+            self.optimized_parameters = self.parameter_tuning_threading(has_comb=False)
+        else:
+            for self.comb in self.levels:
+                self.optimized_parameters[self.get_param_key()] = self.parameter_tuning_threading()
+                if not check_request_stoped(self.job):
+                    break
         print("updating model parameters")
-        config = read_yaml(conf('docs_main_path'), 'configs.yaml')
-        config['hyper_parameters']['lstm'] = self.optimized_parameters
-        config['has_param_tuning_first_run']['lstm'] = True
-        write_yaml(conf('docs_main_path'), "configs.yaml", config)
-        self.params = conf('parameters')
+        pt_config = read_yaml(conf('docs_main_path'), 'parameter_tunning.yaml')
+        pt_config['has_param_tuning_first_run']['lstm'] = True
+        _key = 'hyper_parameters' if len(self.levels) == 0 else 'combination_params'
+        pt_config[_key]['lstm'] = self.optimized_parameters
+        write_yaml(conf('docs_main_path'), "parameter_tunning.yaml", pt_config, ignoring_aliases=True)
+        self.params = hyper_conf('lstm')
+        self.combination_params = hyper_conf('lstm_cp')
+
 
 
