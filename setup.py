@@ -19,6 +19,9 @@ setuptools.setup(
     py_modules=['anomaly_detection', 'anomaly_detection/web'],
     install_requires=[
         "requests",
+        "convertdate",
+        "lunarcalendar",
+        "holidays",
         "docker-compose >= 1.25.5",
         "numpy >= 1.18.1",
         "pandas >= 0.25.3",
