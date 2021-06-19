@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="anomaly_detection_framework",
-    version="0.0.20",
+    version="0.0.21",
     author="Caglan Akpinar",
     author_email="cakpinar23@gmail.com",
     description="Anomaly Detection Framework allows us to calculate Anomalities on any Time - Series Data Sets. It has an interface which is easy to manage to train - predict with given dataset.",
@@ -19,6 +19,9 @@ setuptools.setup(
     py_modules=['anomaly_detection', 'anomaly_detection/web'],
     install_requires=[
         "requests",
+        "convertdate",
+        "lunarcalendar",
+        "holidays",
         "docker-compose >= 1.25.5",
         "numpy >= 1.18.1",
         "pandas >= 0.25.3",
